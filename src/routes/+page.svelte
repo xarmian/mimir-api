@@ -97,19 +97,34 @@
   <title>Mimir API - Voi Network</title>
   <meta name="description" content="A suite of APIs for the Voi Network" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#1a1a1a">
+  
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="shortcut icon" href="/favicon.ico">
+  
+  <!-- Theme and Social Media -->
+  <meta name="theme-color" content={isDarkMode ? "#1a1a1a" : "#ffffff"}>
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Mimir API - Voi Network">
   <meta name="twitter:description" content="A suite of APIs for the Voi Network">
+  <meta name="twitter:image" content="https://mimir-api.voi.network/android-chrome-512x512.png">
   <meta property="og:title" content="Mimir API - Voi Network">
   <meta property="og:description" content="A suite of APIs for the Voi Network">
   <meta property="og:url" content="https://mimir-api.voi.network">
+  <meta property="og:image" content="https://mimir-api.voi.network/android-chrome-512x512.png">
+  <meta property="og:type" content="website">
 </svelte:head>
 
 <div class="app">
   <header>
     <div class="header-content">
-      <h1>Mimir API</h1>
+      <div class="logo-container">
+        <img src="/android-chrome-192x192.png" alt="Mimir API Logo" class="logo" />
+        <h1>Mimir API</h1>
+      </div>
       <div class="header-right">
         <button 
           class="theme-toggle" 
@@ -211,6 +226,18 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+  }
+
+  .logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
   }
 
   .theme-toggle {
