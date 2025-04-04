@@ -162,6 +162,80 @@
   "next-token": 2818368
 }`
       }
+    },
+    {
+      title: 'ARC200 Tokens',
+      path: '/arc200/tokens',
+      method: 'GET',
+      description: 'Get all available ARC200 tokens on the Voi Network.',
+      endpoint: 'arc200tokens',
+      parameters: [
+        {
+          name: 'contractId',
+          type: 'number',
+          description: 'The contract application ID',
+          required: false
+        },
+        {
+          name: 'symbol',
+          type: 'string',
+          description: 'Filter by token symbol',
+          required: false
+        },
+        {
+          name: 'verified',
+          type: 'number',
+          description: 'Filter for verified tokens (1) or unverified tokens (0)',
+          required: false
+        },
+        {
+          name: 'limit',
+          type: 'number',
+          description: 'Maximum number of results to return',
+          default: '100'
+        },
+        {
+          name: 'next-token',
+          type: 'string',
+          description: 'Token for pagination',
+          required: false
+        }
+      ],
+      example: {
+        request: 'GET /arc200/tokens?limit=1',
+        response: `{
+  "current-round": 6278917,
+  "total-count": 185,
+  "next-token": "1",
+  "tokens": [
+    {
+      "contractId": 420069,
+      "name": "UNIT", 
+      "symbol": "UNIT",
+      "decimals": 8,
+      "totalSupply": "2171712075756",
+      "creator": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "deleted": 0,
+      "verified": 1,
+      "mintRound": 4224601,
+      "globalState": {
+        "creator": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "approvalProgram": "...",
+        "clearStateProgram": "...",
+        "globalStateSchema": {
+          "numUint": 0,
+          "numByteSlice": 0
+        },
+        "localStateSchema": {
+          "numUint": 0,
+          "numByteSlice": 0
+        },
+        "extraProgramPages": 0
+      }
+    }
+  ]
+}`
+      }
     }
   ];
 
@@ -245,6 +319,7 @@
             <div class="version">
               <h3>Recent Changes</h3>
               <ul>
+                <li>2024-04-04: Added ARC200 tokens API endpoint.</li>
                 <li>2024-04-04: Added ARC200 token transfers API endpoint.</li>
                 <li>2024-04-04: Initial release with ARC200 token balances API.</li>
               </ul>

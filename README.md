@@ -8,6 +8,7 @@ Currently, the Mimir API suite includes:
 
 - **ARC200 Token Balances API**: Query ARC-200 token balances for accounts on the Voi Network.
 - **ARC200 Token Transfers API**: Query ARC-200 token transfer history on the Voi Network.
+- **ARC200 Tokens API**: Query all available ARC-200 tokens on the Voi Network.
 
 ## Running Your Own Instance
 
@@ -136,6 +137,56 @@ pm2 start build/index.js --name mimir-api
     }
   ],
   "next-token": 6273807
+}
+```
+
+### ARC200 Tokens
+
+**Endpoint:** `/arc200/tokens`
+
+**Method:** GET
+
+**Query Parameters:**
+
+- `contractId` (optional): The contract application ID
+- `symbol` (optional): Filter by token symbol
+- `verified` (optional): Filter for verified tokens (1) or unverified tokens (0)
+- `limit` (optional): Maximum number of results to return, default is 100
+- `next-token` (optional): Token for pagination
+
+**Example Response:**
+
+```json
+{
+  "current-round": 6278917,
+  "total-count": 185,
+  "next-token": "1",
+  "tokens": [
+    {
+      "contractId": 420069,
+      "name": "UNIT",
+      "symbol": "UNIT",
+      "decimals": 8,
+      "totalSupply": "2171712075756",
+      "creator": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "deleted": 0,
+      "mintRound": 4224601,
+      "globalState": {
+        "creator": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "approvalProgram": "...",
+        "clearStateProgram": "...",
+        "globalStateSchema": {
+          "numUint": 0,
+          "numByteSlice": 0
+        },
+        "localStateSchema": {
+          "numUint": 0,
+          "numByteSlice": 0
+        },
+        "extraProgramPages": 0
+      }
+    }
+  ]
 }
 ```
 

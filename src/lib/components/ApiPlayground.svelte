@@ -49,6 +49,15 @@
       if (includes) searchParams.set('includes', includes);
       const queryString = searchParams.toString();
       return `${baseUrl}/arc200/transfers${queryString ? `?${queryString}` : ''}`;
+    } else if (actualEndpoint === 'arc200tokens') {
+      const searchParams = new URLSearchParams();
+      if (contractId) searchParams.set('contractId', contractId);
+      if (symbol) searchParams.set('symbol', symbol);
+      if (verified) searchParams.set('verified', verified);
+      if (limit !== 100) searchParams.set('limit', limit.toString());
+      if (nextToken) searchParams.set('next-token', nextToken);
+      const queryString = searchParams.toString();
+      return `${baseUrl}/arc200/tokens${queryString ? `?${queryString}` : ''}`;
     }
     
     return `${baseUrl}`;
@@ -142,6 +151,7 @@ func main() {
         <select id="endpoint" bind:value={actualEndpoint} class="endpoint-select">
           <option value="arc200balances">ARC200 Token Balances</option>
           <option value="arc200transfers">ARC200 Token Transfers</option>
+          <option value="arc200tokens">ARC200 Tokens</option>
         </select>
       </div>
 
@@ -279,6 +289,49 @@ func main() {
             id="includes"
             bind:value={includes} 
             placeholder="Additional data to include" />
+        </div>
+      {:else if actualEndpoint === 'arc200tokens'}
+        <div class="input-group">
+          <label for="contractId">Contract ID (optional)</label>
+          <input 
+            type="number" 
+            id="contractId"
+            bind:value={contractId} 
+            placeholder="Enter ARC200 contract ID" />
+        </div>
+        <div class="input-group">
+          <label for="symbol">Symbol (optional)</label>
+          <input 
+            type="text" 
+            id="symbol"
+            bind:value={symbol} 
+            placeholder="Enter token symbol" />
+        </div>
+        <div class="input-group">
+          <label for="verified">Verified (optional)</label>
+          <select id="verified" bind:value={verified}>
+            <option value="">All tokens</option>
+            <option value="1">Verified only</option>
+            <option value="0">Unverified only</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="limit">Result Limit (optional)</label>
+          <input 
+            type="number" 
+            id="limit"
+            bind:value={limit} 
+            min="1" 
+            max="1000" 
+            placeholder="Result limit" />
+        </div>
+        <div class="input-group">
+          <label for="nextToken">Next Token (optional)</label>
+          <input 
+            type="text" 
+            id="nextToken"
+            bind:value={nextToken} 
+            placeholder="Token for pagination" />
         </div>
       {/if}
 
