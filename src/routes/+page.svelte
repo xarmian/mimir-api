@@ -76,6 +76,92 @@
   "current-round": 6278517
 }`
       }
+    },
+    {
+      title: 'ARC200 Token Transfers',
+      path: '/arc200/transfers',
+      method: 'GET',
+      description: 'Get token transfer history for ARC200 tokens on the Voi Network.',
+      endpoint: 'arc200transfers',
+      parameters: [
+        {
+          name: 'contractId',
+          type: 'number',
+          description: 'The contract application ID',
+          required: false
+        },
+        {
+          name: 'user',
+          type: 'string',
+          description: 'Filter transfers where the address is sender or receiver',
+          required: false
+        },
+        {
+          name: 'from',
+          type: 'string',
+          description: 'Filter by sender address',
+          required: false
+        },
+        {
+          name: 'to',
+          type: 'string',
+          description: 'Filter by receiver address',
+          required: false
+        },
+        {
+          name: 'round',
+          type: 'number',
+          description: 'Filter by round number',
+          required: false
+        },
+        {
+          name: 'min_round',
+          type: 'number',
+          description: 'Filter for transfers at or after this round',
+          required: false
+        },
+        {
+          name: 'max_round',
+          type: 'number',
+          description: 'Filter for transfers at or before this round',
+          required: false
+        },
+        {
+          name: 'limit',
+          type: 'number',
+          description: 'Maximum number of results to return',
+          default: '100'
+        },
+        {
+          name: 'offset',
+          type: 'number',
+          description: 'Number of results to skip',
+          default: '0'
+        },
+        {
+          name: 'includes',
+          type: 'string',
+          description: 'Additional data to include',
+          required: false
+        }
+      ],
+      example: {
+        request: 'GET /arc200/transfers?contractId=419000&limit=3',
+        response: `{
+  "transfers": [
+    {
+      "transactionId": "LSIVMJMBZZVCJI27NEFZF7CVTUJMMKQNDMXEJ2G6EELVTMJBJHWA",
+      "contractId": 419000,
+      "timestamp": 1743773886,
+      "round": 6273806,
+      "sender": "THANKYOUJE4LVRECDJOBPYZXFEVOXF3VQ6QEAXB3BFZWXDFJWE27URFZ3Q",
+      "receiver": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "amount": "100000000"
+    }
+  ],
+  "next-token": 2818368
+}`
+      }
     }
   ];
 
@@ -159,6 +245,7 @@
             <div class="version">
               <h3>Recent Changes</h3>
               <ul>
+                <li>2024-04-04: Added ARC200 token transfers API endpoint.</li>
                 <li>2024-04-04: Initial release with ARC200 token balances API.</li>
               </ul>
             </div>

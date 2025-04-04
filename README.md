@@ -7,6 +7,7 @@ Mimir API provides a suite of services for the Voi Network, helping developers b
 Currently, the Mimir API suite includes:
 
 - **ARC200 Token Balances API**: Query ARC-200 token balances for accounts on the Voi Network.
+- **ARC200 Token Transfers API**: Query ARC-200 token transfer history on the Voi Network.
 
 ## Running Your Own Instance
 
@@ -97,6 +98,44 @@ pm2 start build/index.js --name mimir-api
   "next_token": null,
   "total-count": 4224,
   "current-round": 6278517
+}
+```
+
+### ARC200 Token Transfers
+
+**Endpoint:** `/arc200/transfers`
+
+**Method:** GET
+
+**Query Parameters:**
+
+- `contractId` (optional): The contract application ID
+- `user` (optional): Filter transfers where the address is sender or receiver
+- `from` (optional): Filter by sender address
+- `to` (optional): Filter by receiver address
+- `round` (optional): Filter by round number
+- `min_round` (optional): Filter for transfers at or after this round
+- `max_round` (optional): Filter for transfers at or before this round
+- `limit` (optional): Maximum number of results to return, default is 100
+- `offset` (optional): Number of results to skip, default is 0
+- `includes` (optional): Additional data to include
+
+**Example Response:**
+
+```json
+{
+  "transfers": [
+    {
+      "transactionId": "LSIVMJMBZZVCJI27NEFZF7CVTUJMMKQNDMXEJ2G6EELVTMJBJHWA",
+      "contractId": 419000,
+      "timestamp": 1743773886,
+      "round": 6273806,
+      "sender": "THANKYOUJE4LVRECDJOBPYZXFEVOXF3VQ6QEAXB3BFZWXDFJWE27URFZ3Q",
+      "receiver": "R7TBR3Y5QCM6Y2OPQP3BPNUQG7TLN75IOC2WTNRUKO4VPNSDQF52MZB4ZE",
+      "amount": "100000000"
+    }
+  ],
+  "next-token": 6273807
 }
 ```
 

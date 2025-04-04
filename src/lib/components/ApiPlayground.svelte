@@ -6,6 +6,14 @@
   let verified = '';
   let limit = 100;
   let nextToken = '';
+  let user = '';
+  let from = '';
+  let to = '';
+  let round = '';
+  let minRound = '';
+  let maxRound = '';
+  let offset = 0;
+  let includes = '';
   let response: any = null;
   let isLoading = false;
   let error: string | null = null;
@@ -27,6 +35,20 @@
       if (nextToken) searchParams.set('next-token', nextToken);
       const queryString = searchParams.toString();
       return `${baseUrl}/arc200/balances${queryString ? `?${queryString}` : ''}`;
+    } else if (actualEndpoint === 'arc200transfers') {
+      const searchParams = new URLSearchParams();
+      if (contractId) searchParams.set('contractId', contractId);
+      if (user) searchParams.set('user', user);
+      if (from) searchParams.set('from', from);
+      if (to) searchParams.set('to', to);
+      if (round) searchParams.set('round', round);
+      if (minRound) searchParams.set('min_round', minRound);
+      if (maxRound) searchParams.set('max_round', maxRound);
+      if (limit !== 100) searchParams.set('limit', limit.toString());
+      if (offset !== 0) searchParams.set('offset', offset.toString());
+      if (includes) searchParams.set('includes', includes);
+      const queryString = searchParams.toString();
+      return `${baseUrl}/arc200/transfers${queryString ? `?${queryString}` : ''}`;
     }
     
     return `${baseUrl}`;
@@ -119,6 +141,7 @@ func main() {
         <label for="endpoint">Endpoint</label>
         <select id="endpoint" bind:value={actualEndpoint} class="endpoint-select">
           <option value="arc200balances">ARC200 Token Balances</option>
+          <option value="arc200transfers">ARC200 Token Transfers</option>
         </select>
       </div>
 
@@ -172,6 +195,90 @@ func main() {
             id="nextToken"
             bind:value={nextToken} 
             placeholder="Token for pagination" />
+        </div>
+      {:else if actualEndpoint === 'arc200transfers'}
+        <div class="input-group">
+          <label for="contractId">Contract ID (optional)</label>
+          <input 
+            type="number" 
+            id="contractId"
+            bind:value={contractId} 
+            placeholder="Enter ARC200 contract ID" />
+        </div>
+        <div class="input-group">
+          <label for="user">User Address (optional)</label>
+          <input 
+            type="text" 
+            id="user"
+            bind:value={user} 
+            placeholder="Address that is either sender or receiver" />
+        </div>
+        <div class="input-group">
+          <label for="from">From Address (optional)</label>
+          <input 
+            type="text" 
+            id="from"
+            bind:value={from} 
+            placeholder="Sender address" />
+        </div>
+        <div class="input-group">
+          <label for="to">To Address (optional)</label>
+          <input 
+            type="text" 
+            id="to"
+            bind:value={to} 
+            placeholder="Receiver address" />
+        </div>
+        <div class="input-group">
+          <label for="round">Round (optional)</label>
+          <input 
+            type="number" 
+            id="round"
+            bind:value={round} 
+            placeholder="Specific round number" />
+        </div>
+        <div class="input-group">
+          <label for="minRound">Min Round (optional)</label>
+          <input 
+            type="number" 
+            id="minRound"
+            bind:value={minRound} 
+            placeholder="Minimum round number" />
+        </div>
+        <div class="input-group">
+          <label for="maxRound">Max Round (optional)</label>
+          <input 
+            type="number" 
+            id="maxRound"
+            bind:value={maxRound} 
+            placeholder="Maximum round number" />
+        </div>
+        <div class="input-group">
+          <label for="limit">Result Limit (optional)</label>
+          <input 
+            type="number" 
+            id="limit"
+            bind:value={limit} 
+            min="1" 
+            max="1000" 
+            placeholder="Result limit" />
+        </div>
+        <div class="input-group">
+          <label for="offset">Offset (optional)</label>
+          <input 
+            type="number" 
+            id="offset"
+            bind:value={offset} 
+            min="0" 
+            placeholder="Number of results to skip" />
+        </div>
+        <div class="input-group">
+          <label for="includes">Includes (optional)</label>
+          <input 
+            type="text" 
+            id="includes"
+            bind:value={includes} 
+            placeholder="Additional data to include" />
         </div>
       {/if}
 
