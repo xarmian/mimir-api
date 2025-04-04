@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   const dispatch = createEventDispatcher();
 
   export let endpoint: {
@@ -20,14 +20,26 @@
       response: string;
     };
   };
+  
+  export let expanded: boolean = false;
 
-  let showDetails = false;
+  let showDetails = expanded;
+  
+  // Make showDetails reactive to external expanded prop
+  $: if (expanded !== showDetails) {
+    showDetails = expanded;
+  }
+  
+  function toggleDetails() {
+    showDetails = !showDetails;
+    dispatch('expand', { endpoint: endpoint.endpoint, expanded: showDetails });
+  }
 </script>
 
 <div class="endpoint-card">
   <button 
     class="endpoint-header" 
-    on:click={() => showDetails = !showDetails}
+    on:click={toggleDetails}
     aria-expanded={showDetails}>
     <div class="header-content">
       <h3>{endpoint.title}</h3>
