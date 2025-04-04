@@ -85,18 +85,18 @@ pm2 start build/index.js --name mimir-api
 {
   "results": [
     {
-      "contract_id": 123456,
-      "account_id": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-      "asset_id": 789012,
-      "symbol": "TOKEN",
-      "name": "Example Token",
-      "decimals": 6,
-      "balance": "1000000000",
-      "formatted_balance": "1000.000000",
-      "verified": 1
+      "name": "UNIT",
+      "symbol": "UNIT",
+      "balance": "2171712075756",
+      "decimals": 8,
+      "verified": 1,
+      "accountId": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "contractId": 420069
     }
   ],
-  "next_token": null
+  "next_token": null,
+  "total-count": 4224,
+  "current-round": 6278517
 }
 ```
 
