@@ -226,11 +226,11 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Mimir API - Voi Network">
   <meta name="twitter:description" content="A suite of APIs for the Voi Network">
-  <meta name="twitter:image" content="https://mimir-api.voi.network/android-chrome-512x512.png">
+  <meta name="twitter:image" content="https://voi-mainnet-mimirapi.nftnavigator.xyz/android-chrome-512x512.png">
   <meta property="og:title" content="Mimir API - Voi Network">
   <meta property="og:description" content="A suite of APIs for the Voi Network">
-  <meta property="og:url" content="https://mimir-api.voi.network">
-  <meta property="og:image" content="https://mimir-api.voi.network/android-chrome-512x512.png">
+  <meta property="og:url" content="https://voi-mainnet-mimirapi.nftnavigator.xyz">
+  <meta property="og:image" content="https://voi-mainnet-mimirapi.nftnavigator.xyz/android-chrome-512x512.png">
   <meta property="og:type" content="website">
 </svelte:head>
 
