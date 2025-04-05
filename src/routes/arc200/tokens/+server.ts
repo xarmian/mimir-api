@@ -61,7 +61,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     // Create parameters object for RPC call
     const queryParams: Record<string, any> = {};
     
-    if (contractId) queryParams.contractId = parseInt(contractId);
+    if (contractId) queryParams.contractId = contractId;
     if (symbol) queryParams.symbol = symbol;
     if (verified !== null) queryParams.verified = parseInt(verified);
     if (limit) queryParams.limit = parseInt(limit);
