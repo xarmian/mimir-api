@@ -225,8 +225,67 @@ const arc200Tokens = {
       }
 };
 
+const arc200Approvals = {
+    title: 'ARC200 Token Approvals',
+    path: '/arc200/approvals',
+    method: 'GET',
+    description: 'Get token approval information for ARC200 tokens on the Voi Network.',
+    endpoint: 'arc200approvals',
+    parameters: [
+      {
+        name: 'contractId',
+        type: 'number',
+        description: 'The contract application ID',
+        required: false
+      },
+      {
+        name: 'owner',
+        type: 'string',
+        description: 'Filter by owner address',
+        required: false
+      },
+      {
+        name: 'spender',
+        type: 'string',
+        description: 'Filter by spender address',
+        required: false
+      },
+      {
+        name: 'limit',
+        type: 'number',
+        description: 'Maximum number of results to return',
+        default: '100'
+      },
+      {
+        name: 'next-token',
+        type: 'string',
+        description: 'Token for pagination',
+        required: false
+      }
+    ],
+    example: {
+      request: 'GET /arc200/approvals?owner=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+      response: `{
+  "results": [
+    {
+      "contractId": 420069,
+      "owner": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "spender": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+      "amount": "1000000000",
+      "transactionId": "LSIVMJMBZZVCJI27NEFZF7CVTUJMMKQNDMXEJ2G6EELVTMJBJHWA",
+      "round": 6278517
+    }
+  ],
+  "next_token": null,
+  "total-count": 12,
+  "current-round": 6278517
+}`
+    }
+};
+
 export const endpoints = [
     arc200Tokens,
     arc200Balances,
     arc200Transfers,
+    arc200Approvals
 ];

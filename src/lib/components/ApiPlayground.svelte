@@ -14,6 +14,8 @@
   let maxRound = '';
   let offset = 0;
   let includes = '';
+  let owner = '';
+  let spender = '';
   let response: any = null;
   let isLoading = false;
   let error: string | null = null;
@@ -58,6 +60,15 @@
       if (nextToken) searchParams.set('next-token', nextToken);
       const queryString = searchParams.toString();
       return `${baseUrl}/arc200/tokens${queryString ? `?${queryString}` : ''}`;
+    } else if (actualEndpoint === 'arc200approvals') {
+      const searchParams = new URLSearchParams();
+      if (contractId) searchParams.set('contractId', contractId);
+      if (owner) searchParams.set('owner', owner);
+      if (spender) searchParams.set('spender', spender);
+      if (limit !== 100) searchParams.set('limit', limit.toString());
+      if (nextToken) searchParams.set('next-token', nextToken);
+      const queryString = searchParams.toString();
+      return `${baseUrl}/arc200/approvals${queryString ? `?${queryString}` : ''}`;
     }
     
     return `${baseUrl}`;
@@ -152,6 +163,7 @@ func main() {
           <option value="arc200balances">ARC200 Token Balances</option>
           <option value="arc200transfers">ARC200 Token Transfers</option>
           <option value="arc200tokens">ARC200 Tokens</option>
+          <option value="arc200approvals">ARC200 Token Approvals</option>
         </select>
       </div>
 
@@ -314,6 +326,49 @@ func main() {
             <option value="1">Verified only</option>
             <option value="0">Unverified only</option>
           </select>
+        </div>
+        <div class="input-group">
+          <label for="limit">Result Limit (optional)</label>
+          <input 
+            type="number" 
+            id="limit"
+            bind:value={limit} 
+            min="1" 
+            max="1000" 
+            placeholder="Result limit" />
+        </div>
+        <div class="input-group">
+          <label for="nextToken">Next Token (optional)</label>
+          <input 
+            type="text" 
+            id="nextToken"
+            bind:value={nextToken} 
+            placeholder="Token for pagination" />
+        </div>
+      {:else if actualEndpoint === 'arc200approvals'}
+        <div class="input-group">
+          <label for="contractId">Contract ID (optional)</label>
+          <input 
+            type="number" 
+            id="contractId"
+            bind:value={contractId} 
+            placeholder="Enter ARC200 contract ID" />
+        </div>
+        <div class="input-group">
+          <label for="owner">Owner Address (optional)</label>
+          <input 
+            type="text" 
+            id="owner"
+            bind:value={owner} 
+            placeholder="Token owner address" />
+        </div>
+        <div class="input-group">
+          <label for="spender">Spender Address (optional)</label>
+          <input 
+            type="text" 
+            id="spender"
+            bind:value={spender} 
+            placeholder="Token spender address" />
         </div>
         <div class="input-group">
           <label for="limit">Result Limit (optional)</label>

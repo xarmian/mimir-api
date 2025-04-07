@@ -345,6 +345,7 @@
             <div class="version">
               <h3>Recent Changes</h3>
               <ul>
+                <li>2024-04-08: Added ARC200 approvals API endpoint.</li>
                 <li>2024-04-04: Added ARC200 tokens API endpoint.</li>
                 <li>2024-04-04: Added ARC200 token transfers API endpoint.</li>
                 <li>2024-04-04: Initial release with ARC200 token balances API.</li>
