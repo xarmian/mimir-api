@@ -345,7 +345,7 @@
             <div class="version">
               <h3>Recent Changes</h3>
               <ul>
-                <li>2024-04-08: Added ARC200 approvals API endpoint.</li>
+                <li>2024-04-08: Added ARC200 token approvals API endpoint.</li>
                 <li>2024-04-04: Added ARC200 tokens API endpoint.</li>
                 <li>2024-04-04: Added ARC200 token transfers API endpoint.</li>
                 <li>2024-04-04: Initial release with ARC200 token balances API.</li>
@@ -358,6 +358,13 @@
           <section class="intro">
             <h2>Quick Start</h2>
             <p>Mimir API provides a suite of services for the Voi Network, helping developers build applications with easy access to chain data.</p>
+            <div class="github-links">
+              <p>
+                <strong>GitHub Repositories:</strong> 
+                <a href="https://github.com/xarmian/mimir-api" target="_blank" rel="noopener noreferrer">Mimir API</a> | 
+                <a href="https://github.com/cswenor/mimir" target="_blank" rel="noopener noreferrer">Mimir Project</a>
+              </p>
+            </div>
           </section>
           
           {#if filteredEndpoints.length > 0}
@@ -807,6 +814,30 @@
       width: 100%;
       justify-content: space-between;
     }
+  }
+  
+  .github-links {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+  }
+  
+  .github-links p {
+    margin: 0;
+  }
+  
+  .github-links a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.2s;
+  }
+  
+  .github-links a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
   }
 </style>
 
