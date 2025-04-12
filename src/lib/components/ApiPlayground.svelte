@@ -12,6 +12,8 @@
   let round = '';
   let minRound = '';
   let maxRound = '';
+  let minTimestamp = '';
+  let maxTimestamp = '';
   let offset = 0;
   let includes = '';
   let owner = '';
@@ -20,6 +22,13 @@
   let isLoading = false;
   let error: string | null = null;
   let selectedLanguage = 'curl';
+  let tokenId = '';
+  let tokenIds = '';
+  let approved = '';
+  let blacklisted = '';
+  let creator = '';
+  let mintMinRound = '';
+  let mintMaxRound = '';
 
   // Default to 'arc200balances' if no endpoint is selected
   $: actualEndpoint = selectedEndpoint || 'arc200balances';
@@ -69,6 +78,47 @@
       if (nextToken) searchParams.set('next-token', nextToken);
       const queryString = searchParams.toString();
       return `${baseUrl}/arc200/approvals${queryString ? `?${queryString}` : ''}`;
+    } else if (actualEndpoint === 'arc72tokens') {
+      const searchParams = new URLSearchParams();
+      if (contractId) searchParams.set('contractId', contractId);
+      if (tokenId) searchParams.set('tokenId', tokenId);
+      if (owner) searchParams.set('owner', owner);
+      if (tokenIds) searchParams.set('tokenIds', tokenIds);
+      if (approved) searchParams.set('approved', approved);
+      if (round) searchParams.set('round', round);
+      if (limit !== 100) searchParams.set('limit', limit.toString());
+      if (nextToken) searchParams.set('next-token', nextToken);
+      const queryString = searchParams.toString();
+      return `${baseUrl}/nft-indexer/v1/tokens${queryString ? `?${queryString}` : ''}`;
+    } else if (actualEndpoint === 'arc72transfers') {
+      const searchParams = new URLSearchParams();
+      if (contractId) searchParams.set('contractId', contractId);
+      if (tokenId) searchParams.set('tokenId', tokenId);
+      if (user) searchParams.set('user', user);
+      if (from) searchParams.set('from', from);
+      if (to) searchParams.set('to', to);
+      if (round) searchParams.set('round', round);
+      if (minRound) searchParams.set('min-round', minRound);
+      if (maxRound) searchParams.set('max-round', maxRound);
+      if (minTimestamp) searchParams.set('min-time', minTimestamp);
+      if (maxTimestamp) searchParams.set('max-time', maxTimestamp);
+      if (limit !== 100) searchParams.set('limit', limit.toString());
+      if (nextToken) searchParams.set('next-token', nextToken);
+      const queryString = searchParams.toString();
+      return `${baseUrl}/nft-indexer/v1/transfers${queryString ? `?${queryString}` : ''}`;
+    } else if (actualEndpoint === 'arc72collections') {
+      const searchParams = new URLSearchParams();
+      if (contractId) searchParams.set('contractId', contractId);
+      if (verified) searchParams.set('verified', verified);
+      if (blacklisted) searchParams.set('blacklisted', blacklisted);
+      if (creator) searchParams.set('creator', creator);
+      if (mintMinRound) searchParams.set('mint-min-round', mintMinRound);
+      if (mintMaxRound) searchParams.set('mint-max-round', mintMaxRound);
+      if (includes) searchParams.set('includes', includes);
+      if (limit !== 100) searchParams.set('limit', limit.toString());
+      if (nextToken) searchParams.set('next-token', nextToken);
+      const queryString = searchParams.toString();
+      return `${baseUrl}/nft-indexer/v1/collections${queryString ? `?${queryString}` : ''}`;
     }
     
     return `${baseUrl}`;
@@ -164,6 +214,9 @@ func main() {
           <option value="arc200transfers">ARC200 Token Transfers</option>
           <option value="arc200tokens">ARC200 Tokens</option>
           <option value="arc200approvals">ARC200 Token Approvals</option>
+          <option value="arc72tokens">ARC72 Tokens</option>
+          <option value="arc72transfers">ARC72 Token Transfers</option>
+          <option value="arc72collections">ARC72 Collections</option>
         </select>
       </div>
 
@@ -369,6 +422,247 @@ func main() {
             id="spender"
             bind:value={spender} 
             placeholder="Token spender address" />
+        </div>
+        <div class="input-group">
+          <label for="limit">Result Limit (optional)</label>
+          <input 
+            type="number" 
+            id="limit"
+            bind:value={limit} 
+            min="1" 
+            max="1000" 
+            placeholder="Result limit" />
+        </div>
+        <div class="input-group">
+          <label for="nextToken">Next Token (optional)</label>
+          <input 
+            type="text" 
+            id="nextToken"
+            bind:value={nextToken} 
+            placeholder="Token for pagination" />
+        </div>
+      {:else if actualEndpoint === 'arc72tokens'}
+        <div class="input-group">
+          <label for="contractId">Contract ID (optional)</label>
+          <input 
+            type="number" 
+            id="contractId"
+            bind:value={contractId} 
+            placeholder="Enter ARC72 contract ID" />
+        </div>
+        <div class="input-group">
+          <label for="tokenId">Token ID (optional)</label>
+          <input 
+            type="text" 
+            id="tokenId"
+            bind:value={tokenId} 
+            placeholder="Enter token ID" />
+        </div>
+        <div class="input-group">
+          <label for="owner">Owner Address (optional)</label>
+          <input 
+            type="text" 
+            id="owner"
+            bind:value={owner} 
+            placeholder="Token owner address" />
+        </div>
+        <div class="input-group">
+          <label for="tokenIds">Token IDs (optional, comma-separated)</label>
+          <input 
+            type="text" 
+            id="tokenIds"
+            bind:value={tokenIds} 
+            placeholder="Comma-separated token IDs" />
+        </div>
+        <div class="input-group">
+          <label for="approved">Approved Address (optional)</label>
+          <input 
+            type="text" 
+            id="approved"
+            bind:value={approved} 
+            placeholder="Approved address" />
+        </div>
+        <div class="input-group">
+          <label for="round">Round (optional)</label>
+          <input 
+            type="number" 
+            id="round"
+            bind:value={round} 
+            placeholder="Specific round number" />
+        </div>
+        <div class="input-group">
+          <label for="limit">Result Limit (optional)</label>
+          <input 
+            type="number" 
+            id="limit"
+            bind:value={limit} 
+            min="1" 
+            max="1000" 
+            placeholder="Result limit" />
+        </div>
+        <div class="input-group">
+          <label for="nextToken">Next Token (optional)</label>
+          <input 
+            type="text" 
+            id="nextToken"
+            bind:value={nextToken} 
+            placeholder="Token for pagination" />
+        </div>
+      {:else if actualEndpoint === 'arc72transfers'}
+        <div class="input-group">
+          <label for="contractId">Contract ID (optional)</label>
+          <input 
+            type="number" 
+            id="contractId"
+            bind:value={contractId} 
+            placeholder="Enter ARC72 contract ID" />
+        </div>
+        <div class="input-group">
+          <label for="tokenId">Token ID (optional)</label>
+          <input 
+            type="text" 
+            id="tokenId"
+            bind:value={tokenId} 
+            placeholder="Enter token ID" />
+        </div>
+        <div class="input-group">
+          <label for="user">User Address (optional)</label>
+          <input 
+            type="text" 
+            id="user"
+            bind:value={user} 
+            placeholder="Address that is either sender or receiver" />
+        </div>
+        <div class="input-group">
+          <label for="from">From Address (optional)</label>
+          <input 
+            type="text" 
+            id="from"
+            bind:value={from} 
+            placeholder="Sender address" />
+        </div>
+        <div class="input-group">
+          <label for="to">To Address (optional)</label>
+          <input 
+            type="text" 
+            id="to"
+            bind:value={to} 
+            placeholder="Receiver address" />
+        </div>
+        <div class="input-group">
+          <label for="round">Round (optional)</label>
+          <input 
+            type="number" 
+            id="round"
+            bind:value={round} 
+            placeholder="Specific round number" />
+        </div>
+        <div class="input-group">
+          <label for="minRound">Min Round (optional)</label>
+          <input 
+            type="number" 
+            id="minRound"
+            bind:value={minRound} 
+            placeholder="Minimum round number" />
+        </div>
+        <div class="input-group">
+          <label for="maxRound">Max Round (optional)</label>
+          <input 
+            type="number" 
+            id="maxRound"
+            bind:value={maxRound} 
+            placeholder="Maximum round number" />
+        </div>
+        <div class="input-group">
+          <label for="minTimestamp">Min Timestamp (optional)</label>
+          <input 
+            type="number" 
+            id="minTimestamp"
+            bind:value={minTimestamp} 
+            placeholder="Minimum timestamp" />
+        </div>
+        <div class="input-group">
+          <label for="maxTimestamp">Max Timestamp (optional)</label>
+          <input 
+            type="number" 
+            id="maxTimestamp"
+            bind:value={maxTimestamp} 
+            placeholder="Maximum timestamp" />
+        </div>
+        <div class="input-group">
+          <label for="limit">Result Limit (optional)</label>
+          <input 
+            type="number" 
+            id="limit"
+            bind:value={limit} 
+            min="1" 
+            max="1000" 
+            placeholder="Result limit" />
+        </div>
+        <div class="input-group">
+          <label for="nextToken">Next Token (optional)</label>
+          <input 
+            type="text" 
+            id="nextToken"
+            bind:value={nextToken} 
+            placeholder="Token for pagination" />
+        </div>
+      {:else if actualEndpoint === 'arc72collections'}
+        <div class="input-group">
+          <label for="contractId">Contract ID (optional)</label>
+          <input 
+            type="number" 
+            id="contractId"
+            bind:value={contractId} 
+            placeholder="Enter ARC72 contract ID" />
+        </div>
+        <div class="input-group">
+          <label for="verified">Verified (optional)</label>
+          <select id="verified" bind:value={verified}>
+            <option value="">All collections</option>
+            <option value="1">Verified only</option>
+            <option value="0">Unverified only</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="blacklisted">Blacklisted (optional)</label>
+          <select id="blacklisted" bind:value={blacklisted}>
+            <option value="">All collections</option>
+            <option value="true">Blacklisted only</option>
+            <option value="false">Non-blacklisted only</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="creator">Creator Address (optional)</label>
+          <input 
+            type="text" 
+            id="creator"
+            bind:value={creator} 
+            placeholder="Token creator address" />
+        </div>
+        <div class="input-group">
+          <label for="mintMinRound">Mint Min Round (optional)</label>
+          <input 
+            type="number" 
+            id="mintMinRound"
+            bind:value={mintMinRound} 
+            placeholder="Minimum mint round" />
+        </div>
+        <div class="input-group">
+          <label for="mintMaxRound">Mint Max Round (optional)</label>
+          <input 
+            type="number" 
+            id="mintMaxRound"
+            bind:value={mintMaxRound} 
+            placeholder="Maximum mint round" />
+        </div>
+        <div class="input-group">
+          <label for="includes">Includes (optional)</label>
+          <input 
+            type="text" 
+            id="includes"
+            bind:value={includes} 
+            placeholder="Additional data to include" />
         </div>
         <div class="input-group">
           <label for="limit">Result Limit (optional)</label>

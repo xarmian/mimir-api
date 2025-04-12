@@ -283,9 +283,280 @@ const arc200Approvals = {
     }
 };
 
+const arc72Tokens = {
+    title: 'ARC72 Tokens',
+    path: '/nft-indexer/v1/tokens',
+    method: 'GET',
+    description: 'Get all available ARC72 tokens on the Voi Network.',
+    endpoint: 'arc72tokens',
+    parameters: [
+      {
+        name: 'contractId',
+        type: 'number',
+        description: 'The contract application ID',
+        required: false
+      },
+      {
+        name: 'tokenId',
+        type: 'string',
+        description: 'Filter by token ID',
+        required: false
+      },
+      {
+        name: 'owner',
+        type: 'string',
+        description: 'Filter by owner address',
+        required: false
+      },
+      {
+        name: 'approved',
+        type: 'string',
+        description: 'Filter by approved address',
+        required: false
+      },
+      {
+        name: 'tokenIds',
+        type: 'string',
+        description: 'Filter by token IDs',
+        required: false
+      },
+      {
+        name: 'round',
+        type: 'number',
+        description: 'Filter by round number',
+        required: false
+      },
+      {
+        name: 'limit',
+        type: 'number',
+        description: 'Maximum number of results to return',
+        default: '100'
+      },
+      {
+        name: 'next-token',
+        type: 'string',
+        description: 'Token for pagination',
+        required: false
+      }
+    ],
+    example: {
+      request: 'GET /nft-indexer/v1/tokens',
+      response: `{
+  "tokens": [
+    {
+      "owner": "C5NZ5SNL5EMOEVKFW3DS3DBG3FNMIYJAJY3U4I5SRCOXHGY33ML3TGHD24",
+      "tokenId": "1",
+      "approved": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ",
+      "isBurned": false,
+      "metadata": "{\"name\":\"DORK1\",\"description\":\"A very serious project about a growing problem. In this episode, the dorks find themselves in the new waters of Voi. With their numbers vastly diminished, they could one day recover...\",\"image\":\"https://prod.cdn.highforge.io/m/313597/1.webp\",\"image_integrity\":\"/OT6Q1xeNygwyzqtyjE6qTW4Czs3l0DRriVGI8RPJyg=\",\"image_mimetype\":\"image/png\",\"properties\":{\"BACKGROUND\":\"Aquamarine\",\"BODY\":\"Red\",\"ON BODY\":\"Scar\"},\"royalties\":\"AaQnEAAAAAAboqOlU1Py+usrlzt+P8Wv6rJ+GYfjkTdjbFVw98rWlwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\"}",
+      "verified": 0,
+      "contractId": 313597,
+      "mint-round": 429700,
+      "blacklisted": false,
+      "lastUpdated": "2025-04-11T22:51:19Z",
+      "metadataUri": "https://prod.cdn.highforge.io/m/313597/1.json#arc3",
+      "collectionName": null
+    }
+ ],
+  "next-token": null,
+  "total-count": 50,
+  "current-round": 6500841
+}`
+    }
+};
+
+const arc72Transfers = {
+    title: 'ARC72 Token Transfers',
+    path: '/nft-indexer/v1/transfers',
+    method: 'GET',
+    description: 'Get all available ARC72 token transfers on the Voi Network.',
+    endpoint: 'arc72transfers',
+    parameters: [
+      {
+        name: 'contractId',
+        type: 'number',
+        description: 'The contract application ID',
+        required: false
+      },
+      {
+        name: 'tokenId',
+        type: 'string',
+        description: 'Filter by token ID',
+        required: false
+      },
+      {
+        name: 'user',
+        type: 'string',
+        description: 'Filter by user address',
+        required: false
+      },
+      {
+        name: 'from',
+        type: 'string',
+        description: 'Filter by sender address',
+        required: false
+      },
+      {
+        name: 'to',
+        type: 'string',
+        description: 'Filter by receiver address',
+        required: false
+      },
+      {
+        name: 'round',
+        type: 'number',
+        description: 'Filter by round number',
+        required: false
+      },
+      {
+        name: 'min-round',
+        type: 'number',
+        description: 'Filter for transfers at or after this round',
+        required: false
+      },
+      {
+        name: 'max-round',
+        type: 'number',
+        description: 'Filter for transfers at or before this round',
+        required: false
+      },
+      {
+        name: 'limit',
+        type: 'number',
+        description: 'Maximum number of results to return',
+        default: '100'
+      },
+      {
+        name: 'next-token',
+        type: 'string',
+        description: 'Token for pagination',
+        required: false
+      }
+    ],
+    example: {
+      request: 'GET /nft-indexer/v1/transfers',
+      response: `{
+  "transfers": [
+    {
+      "note": "arccjs-v2.10.6:u arc72_transferFrom transaction",
+      "round": 6498253,
+      "toAddr": "R7TBR3Y5QCM6Y2OPQP3BPNUQG7TLN75IOC2WTNRUKO4VPNSDQF52MZB4ZE",
+      "tokenId": "559",
+      "fromAddr": "H7W63MIQJMYBOEYPM5NJEGX3P54H54RZIV2G3OQ2255AULG6U74BE5KFC4",
+      "timestamp": 1744406418,
+      "contractId": "447482",
+      "transactionId": "W6LAGS4UT5SIBPF6ZQPHARQ6WDOZGINK5NWGXU2PVQULVV6MZO4Q"
+    }
+  ],
+  "next-token": null,
+  "total-count": 1,
+  "current-round": 6500841
+}`
+    }
+};
+
+const arc72Collections = {
+    title: 'ARC72 Collections',
+    path: '/nft-indexer/v1/collections',
+    method: 'GET',
+    description: 'Get all available ARC72 NFT collections on the Voi Network.',
+    endpoint: 'arc72collections',
+    parameters: [
+      {
+        name: 'contractId',
+        type: 'string',
+        description: 'The contract application ID or comma-separated list of IDs',
+        required: false
+      },
+      {
+        name: 'verified',
+        type: 'number',
+        description: 'Filter for verified collections (1) or unverified collections (0)',
+        required: false
+      },
+      {
+        name: 'blacklisted',
+        type: 'boolean',
+        description: 'Filter for blacklisted collections',
+        required: false
+      },
+      {
+        name: 'creator',
+        type: 'string',
+        description: 'Filter by creator address',
+        required: false
+      },
+      {
+        name: 'mint-min-round',
+        type: 'number',
+        description: 'Filter for collections minted at or after this round',
+        required: false
+      },
+      {
+        name: 'mint-max-round',
+        type: 'number',
+        description: 'Filter for collections minted at or before this round',
+        required: false
+      },
+      {
+        name: 'includes',
+        type: 'string',
+        description: 'Additional data to include (use "tokens" to include collection tokens)',
+        required: false
+      },
+      {
+        name: 'limit',
+        type: 'number',
+        description: 'Maximum number of results to return',
+        default: '100'
+      },
+      {
+        name: 'next-token',
+        type: 'string',
+        description: 'Token for pagination',
+        required: false
+      }
+    ],
+    example: {
+      request: 'GET /nft-indexer/v1/collections',
+      response: `{
+  "current-round": 6500841,
+  "total-count": 50,
+  "next-token": null,
+  "collections": [
+    {
+      "contractId": 447482,
+      "name": "Voi Punks",
+      "totalSupply": 10000,
+      "mintRound": 1234567,
+      "blacklisted": false,
+      "creator": "H7W63MIQJMYBOEYPM5NJEGX3P54H54RZIV2G3OQ2255AULG6U74BE5KFC4",
+      "imageUrl": "https://example.com/collection/image.png",
+      "deleted": 0,
+      "globalState": [],
+      "uniqueOwners": 2500,
+      "burnedSupply": 5,
+      "verified": 1,
+      "metadata": "{}",
+      "firstToken": {
+        "tokenId": "1",
+        "metadata": "{\\"name\\":\\"Voi Punk #1\\",\\"description\\":\\"First Voi Punk\\",\\"image\\":\\"https://example.com/1.png\\"}",
+        "owner": "H7W63MIQJMYBOEYPM5NJEGX3P54H54RZIV2G3OQ2255AULG6U74BE5KFC4",
+        "approved": null,
+        "mintRound": 1234567
+      }
+    }
+  ]
+}`
+    }
+};
+
 export const endpoints = [
     arc200Tokens,
     arc200Balances,
     arc200Transfers,
-    arc200Approvals
+    arc200Approvals,
+    arc72Tokens,
+    arc72Transfers,
+    arc72Collections
 ];

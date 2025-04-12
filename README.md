@@ -10,6 +10,9 @@ Currently, the Mimir API suite includes:
 - **ARC200 Token Transfers API**: Query ARC-200 token transfer history on the Voi Network.
 - **ARC200 Tokens API**: Query all available ARC-200 tokens on the Voi Network.
 - **ARC200 Tokens Approvals API**: Query ARC-200 token approvals for accounts and tokens on Voi Network.
+- **ARC72 Tokens API**: Query ARC-72 NFT token details on the Voi Network.
+- **ARC72 Transfers API**: Query ARC-72 NFT token transfer history on the Voi Network.
+- **ARC72 Collections API**: Query ARC-72 NFT collections data on the Voi Network.
 
 ## Running Your Own Instance
 
