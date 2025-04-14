@@ -354,7 +354,7 @@ const arc72Tokens = {
       "mint-round": 429700,
       "blacklisted": false,
       "lastUpdated": "2025-04-11T22:51:19Z",
-      "metadataUri": "https://prod.cdn.highforge.io/m/313597/1.json#arc3",
+      "metadataURI": "https://prod.cdn.highforge.io/m/313597/1.json#arc3",
       "collectionName": null
     }
  ],
