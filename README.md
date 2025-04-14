@@ -13,6 +13,9 @@ Currently, the Mimir API suite includes:
 - **ARC72 Tokens API**: Query ARC-72 NFT token details on the Voi Network.
 - **ARC72 Transfers API**: Query ARC-72 NFT token transfer history on the Voi Network.
 - **ARC72 Collections API**: Query ARC-72 NFT collections data on the Voi Network.
+- **Marketplace Listings API**: Query active, sold, and deleted marketplace listings on the Voi Network.
+- **Marketplace Sales API**: Query completed marketplace sales on the Voi Network.
+- **Marketplace Deletes API**: Query deleted marketplace listings on the Voi Network.
 
 ## Running Your Own Instance
 

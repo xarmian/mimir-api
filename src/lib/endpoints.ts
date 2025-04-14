@@ -551,6 +551,435 @@ const arc72Collections = {
     }
 };
 
+const mpListings = {
+    title: 'Marketplace Listings',
+    path: '/nft-indexer/v1/mp/listings',
+    method: 'GET',
+    description: 'Get all available marketplace listings on the Voi Network.',
+    endpoint: 'mplistings',
+    parameters: [
+      {
+        name: 'mpContractId',
+        type: 'number',
+        description: 'Filter by marketplace contract ID',
+        required: false
+      },
+      {
+        name: 'mpListingId',
+        type: 'string',
+        description: 'Filter by marketplace listing ID',
+        required: false
+      },
+      {
+        name: 'collectionId',
+        type: 'string',
+        description: 'Filter by collection contract ID',
+        required: false
+      },
+      {
+        name: 'tokenId',
+        type: 'string',
+        description: 'Filter by token ID',
+        required: false
+      },
+      {
+        name: 'seller',
+        type: 'string',
+        description: 'Filter by seller address',
+        required: false
+      },
+      {
+        name: 'min-round',
+        type: 'number',
+        description: 'Filter for listings created at or after this round',
+        required: false
+      },
+      {
+        name: 'max-round',
+        type: 'number',
+        description: 'Filter for listings created at or before this round',
+        required: false
+      },
+      {
+        name: 'min-price',
+        type: 'number',
+        description: 'Filter for listings with price greater than or equal to this value',
+        required: false
+      },
+      {
+        name: 'max-price',
+        type: 'number',
+        description: 'Filter for listings with price less than or equal to this value',
+        required: false
+      },
+      {
+        name: 'min-time',
+        type: 'number',
+        description: 'Filter for listings created at or after this timestamp',
+        required: false
+      },
+      {
+        name: 'max-time',
+        type: 'number',
+        description: 'Filter for listings created at or before this timestamp',
+        required: false
+      },
+      {
+        name: 'currency',
+        type: 'string',
+        description: 'Filter by currency ID (0 for native token, or ASA ID)',
+        required: false
+      },
+      {
+        name: 'active',
+        type: 'boolean',
+        description: 'Filter for active listings',
+        required: false
+      },
+      {
+        name: 'sold',
+        type: 'boolean',
+        description: 'Filter for sold listings',
+        required: false
+      },
+      {
+        name: 'deleted',
+        type: 'boolean',
+        description: 'Filter for deleted listings',
+        required: false
+      },
+      {
+        name: 'limit',
+        type: 'number',
+        description: 'Maximum number of results to return',
+        default: '100'
+      },
+      {
+        name: 'next-token',
+        type: 'string',
+        description: 'Token for pagination',
+        required: false
+      }
+    ],
+    example: {
+      request: 'GET /nft-indexer/v1/mp/listings?limit=1',
+      response: `{
+  "current-round": 6501842,
+  "total-count": 82,
+  "next-token": "12345",
+  "listings": [
+    {
+      "transactionId": "W6LAGS4UT5SIBPF6ZQPHARQ6WDOZGINK5NWGXU2PVQULVV6MZO4Q",
+      "mpContractId": 449242,
+      "mpListingId": "123",
+      "tokenId": "559",
+      "seller": "H7W63MIQJMYBOEYPM5NJEGX3P54H54RZIV2G3OQ2255AULG6U74BE5KFC4",
+      "price": 1000000,
+      "currency": 0,
+      "createRound": 6498253,
+      "createTimestamp": 1744406418,
+      "endTimestamp": 1744506418,
+      "royalty": "500",
+      "collectionId": 447482,
+      "token": {
+        "tokenId": "559",
+        "owner": "H7W63MIQJMYBOEYPM5NJEGX3P54H54RZIV2G3OQ2255AULG6U74BE5KFC4",
+        "metadata": "{\\"name\\":\\"Voi Punk #559\\",\\"description\\":\\"Punk on Voi\\",\\"image\\":\\"https://example.com/559.png\\"}",
+        "mintRound": 6474201,
+        "approved": null,
+        "isBurned": false
+      },
+      "collection": {
+        "contractId": 447482,
+        "name": "Voi Punks",
+        "verified": 1,
+        "totalSupply": 10000,
+        "mintRound": 6470001,
+        "blacklisted": false,
+        "creator": "H7W63MIQJMYBOEYPM5NJEGX3P54H54RZIV2G3OQ2255AULG6U74BE5KFC4",
+        "imageUrl": "https://example.com/collection/image.png"
+      }
+    }
+  ]
+}`
+    }
+};
+
+const mpSales = {
+    title: 'Marketplace Sales',
+    path: '/nft-indexer/v1/mp/sales',
+    method: 'GET',
+    description: 'Get all marketplace sales on the Voi Network.',
+    endpoint: 'mpsales',
+    parameters: [
+      {
+        name: 'mpContractId',
+        type: 'number',
+        description: 'Filter by marketplace contract ID',
+        required: false
+      },
+      {
+        name: 'mpListingId',
+        type: 'string',
+        description: 'Filter by marketplace listing ID',
+        required: false
+      },
+      {
+        name: 'collectionId',
+        type: 'string',
+        description: 'Filter by collection contract ID',
+        required: false
+      },
+      {
+        name: 'tokenId',
+        type: 'string',
+        description: 'Filter by token ID',
+        required: false
+      },
+      {
+        name: 'seller',
+        type: 'string',
+        description: 'Filter by seller address',
+        required: false
+      },
+      {
+        name: 'buyer',
+        type: 'string',
+        description: 'Filter by buyer address',
+        required: false
+      },
+      {
+        name: 'user',
+        type: 'string',
+        description: 'Filter by user address (either seller or buyer)',
+        required: false
+      },
+      {
+        name: 'min-round',
+        type: 'number',
+        description: 'Filter for sales at or after this round',
+        required: false
+      },
+      {
+        name: 'max-round',
+        type: 'number',
+        description: 'Filter for sales at or before this round',
+        required: false
+      },
+      {
+        name: 'min-price',
+        type: 'number',
+        description: 'Filter for sales with price greater than or equal to this value',
+        required: false
+      },
+      {
+        name: 'max-price',
+        type: 'number',
+        description: 'Filter for sales with price less than or equal to this value',
+        required: false
+      },
+      {
+        name: 'min-time',
+        type: 'number',
+        description: 'Filter for sales at or after this timestamp',
+        required: false
+      },
+      {
+        name: 'max-time',
+        type: 'number',
+        description: 'Filter for sales at or before this timestamp',
+        required: false
+      },
+      {
+        name: 'currency',
+        type: 'string',
+        description: 'Filter by currency ID (0 for native token, or ASA ID)',
+        required: false
+      },
+      {
+        name: 'sort',
+        type: 'string',
+        description: 'Sort order (asc or desc)',
+        required: false
+      },
+      {
+        name: 'limit',
+        type: 'number',
+        description: 'Maximum number of results to return',
+        default: '100'
+      },
+      {
+        name: 'next-token',
+        type: 'string',
+        description: 'Token for pagination',
+        required: false
+      }
+    ],
+    example: {
+      request: 'GET /nft-indexer/v1/mp/sales?limit=1',
+      response: `{
+  "current-round": 6501842,
+  "total-count": 45,
+  "next-token": "54321",
+  "sales": [
+    {
+      "transactionId": "W6LAGS4UT5SIBPF6ZQPHARQ6WDOZGINK5NWGXU2PVQULVV6MZO4Q",
+      "mpContractId": 449242,
+      "mpListingId": "123",
+      "tokenId": "559",
+      "seller": "H7W63MIQJMYBOEYPM5NJEGX3P54H54RZIV2G3OQ2255AULG6U74BE5KFC4",
+      "buyer": "R7TBR3Y5QCM6Y2OPQP3BPNUQG7TLN75IOC2WTNRUKO4VPNSDQF52MZB4ZE",
+      "currency": 0,
+      "price": 1000000,
+      "round": 6498253,
+      "timestamp": 1744406418,
+      "collectionId": 447482,
+      "listing": {
+        "transactionId": "LSIVMJMBZZVCJI27NEFZF7CVTUJMMKQNDMXEJ2G6EELVTMJBJHWA",
+        "mpContractId": 449242,
+        "mpListingId": "123",
+        "tokenId": "559",
+        "seller": "H7W63MIQJMYBOEYPM5NJEGX3P54H54RZIV2G3OQ2255AULG6U74BE5KFC4",
+        "price": 1000000,
+        "currency": 0,
+        "createRound": 6498200,
+        "createTimestamp": 1744406000,
+        "endTimestamp": 1744506000,
+        "royalty": "500",
+        "collectionId": 447482
+      },
+      "token": {
+        "contractId": "447482",
+        "tokenId": "559",
+        "tokenIndex": 0,
+        "owner": "R7TBR3Y5QCM6Y2OPQP3BPNUQG7TLN75IOC2WTNRUKO4VPNSDQF52MZB4ZE",
+        "approved": null,
+        "metadataURI": "https://example.com/metadata/559.json",
+        "mintRound": 6474201,
+        "metadata": "{\\"name\\":\\"Voi Punk #559\\",\\"description\\":\\"Punk on Voi\\",\\"image\\":\\"https://example.com/559.png\\"}"
+      }
+    }
+  ]
+}`
+    }
+};
+
+const mpDeletes = {
+    title: 'Marketplace Deletes',
+    path: '/nft-indexer/v1/mp/deletes',
+    method: 'GET',
+    description: 'Get all deleted marketplace listings on the Voi Network.',
+    endpoint: 'mpdeletes',
+    parameters: [
+      {
+        name: 'mpContractId',
+        type: 'number',
+        description: 'Filter by marketplace contract ID',
+        required: false
+      },
+      {
+        name: 'mpListingId',
+        type: 'string',
+        description: 'Filter by marketplace listing ID',
+        required: false
+      },
+      {
+        name: 'collectionId',
+        type: 'string',
+        description: 'Filter by collection contract ID',
+        required: false
+      },
+      {
+        name: 'tokenId',
+        type: 'string',
+        description: 'Filter by token ID',
+        required: false
+      },
+      {
+        name: 'owner',
+        type: 'string',
+        description: 'Filter by owner address',
+        required: false
+      },
+      {
+        name: 'min-round',
+        type: 'number',
+        description: 'Filter for deletes at or after this round',
+        required: false
+      },
+      {
+        name: 'max-round',
+        type: 'number',
+        description: 'Filter for deletes at or before this round',
+        required: false
+      },
+      {
+        name: 'min-time',
+        type: 'number',
+        description: 'Filter for deletes at or after this timestamp',
+        required: false
+      },
+      {
+        name: 'max-time',
+        type: 'number',
+        description: 'Filter for deletes at or before this timestamp',
+        required: false
+      },
+      {
+        name: 'sort',
+        type: 'string',
+        description: 'Sort order (asc or desc)',
+        required: false
+      },
+      {
+        name: 'limit',
+        type: 'number',
+        description: 'Maximum number of results to return',
+        default: '100'
+      },
+      {
+        name: 'next-token',
+        type: 'string',
+        description: 'Token for pagination',
+        required: false
+      }
+    ],
+    example: {
+      request: 'GET /nft-indexer/v1/mp/deletes?limit=1',
+      response: `{
+  "current-round": 6501842,
+  "total-count": 32,
+  "next-token": "67890",
+  "deletes": [
+    {
+      "transactionId": "W6LAGS4UT5SIBPF6ZQPHARQ6WDOZGINK5NWGXU2PVQULVV6MZO4Q",
+      "mpContractId": 449242,
+      "mpListingId": "123",
+      "tokenId": "559",
+      "owner": "H7W63MIQJMYBOEYPM5NJEGX3P54H54RZIV2G3OQ2255AULG6U74BE5KFC4",
+      "round": 6498253,
+      "timestamp": 1744406418,
+      "collectionId": 447482,
+      "listing": {
+        "transactionId": "LSIVMJMBZZVCJI27NEFZF7CVTUJMMKQNDMXEJ2G6EELVTMJBJHWA",
+        "mpContractId": 449242,
+        "mpListingId": "123",
+        "tokenId": "559",
+        "seller": "H7W63MIQJMYBOEYPM5NJEGX3P54H54RZIV2G3OQ2255AULG6U74BE5KFC4",
+        "price": 1000000,
+        "currency": 0,
+        "createRound": 6498200,
+        "createTimestamp": 1744406000,
+        "endTimestamp": 1744506000,
+        "royalty": "500",
+        "collectionId": 447482
+      }
+    }
+  ]
+}`
+    }
+};
+
 export const endpoints = [
     arc200Tokens,
     arc200Balances,
@@ -558,5 +987,8 @@ export const endpoints = [
     arc200Approvals,
     arc72Tokens,
     arc72Transfers,
-    arc72Collections
+    arc72Collections,
+    mpListings,
+    mpSales,
+    mpDeletes
 ];

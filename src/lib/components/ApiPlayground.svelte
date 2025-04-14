@@ -29,6 +29,19 @@
   let creator = '';
   let mintMinRound = '';
   let mintMaxRound = '';
+  // Marketplace specific fields
+  let mpContractId = '';
+  let mpListingId = '';
+  let collectionId = '';
+  let seller = '';
+  let buyer = '';
+  let minPrice = '';
+  let maxPrice = '';
+  let currency = '';
+  let active = '';
+  let sold = '';
+  let deleted = '';
+  let sort = '';
 
   // Default to 'arc200balances' if no endpoint is selected
   $: actualEndpoint = selectedEndpoint || 'arc200balances';
@@ -119,6 +132,64 @@
       if (nextToken) searchParams.set('next-token', nextToken);
       const queryString = searchParams.toString();
       return `${baseUrl}/nft-indexer/v1/collections${queryString ? `?${queryString}` : ''}`;
+    } else if (actualEndpoint === 'mplistings') {
+      const searchParams = new URLSearchParams();
+      if (mpContractId) searchParams.set('mpContractId', mpContractId);
+      if (mpListingId) searchParams.set('mpListingId', mpListingId);
+      if (collectionId) searchParams.set('collectionId', collectionId);
+      if (tokenId) searchParams.set('tokenId', tokenId);
+      if (seller) searchParams.set('seller', seller);
+      if (minRound) searchParams.set('min-round', minRound);
+      if (maxRound) searchParams.set('max-round', maxRound);
+      if (minPrice) searchParams.set('min-price', minPrice);
+      if (maxPrice) searchParams.set('max-price', maxPrice);
+      if (minTimestamp) searchParams.set('min-time', minTimestamp);
+      if (maxTimestamp) searchParams.set('max-time', maxTimestamp);
+      if (currency) searchParams.set('currency', currency);
+      if (active) searchParams.set('active', active);
+      if (sold) searchParams.set('sold', sold);
+      if (deleted) searchParams.set('deleted', deleted);
+      if (limit !== 100) searchParams.set('limit', limit.toString());
+      if (nextToken) searchParams.set('next-token', nextToken);
+      const queryString = searchParams.toString();
+      return `${baseUrl}/nft-indexer/v1/mp/listings${queryString ? `?${queryString}` : ''}`;
+    } else if (actualEndpoint === 'mpsales') {
+      const searchParams = new URLSearchParams();
+      if (mpContractId) searchParams.set('mpContractId', mpContractId);
+      if (mpListingId) searchParams.set('mpListingId', mpListingId);
+      if (collectionId) searchParams.set('collectionId', collectionId);
+      if (tokenId) searchParams.set('tokenId', tokenId);
+      if (seller) searchParams.set('seller', seller);
+      if (buyer) searchParams.set('buyer', buyer);
+      if (user) searchParams.set('user', user);
+      if (minRound) searchParams.set('min-round', minRound);
+      if (maxRound) searchParams.set('max-round', maxRound);
+      if (minPrice) searchParams.set('min-price', minPrice);
+      if (maxPrice) searchParams.set('max-price', maxPrice);
+      if (minTimestamp) searchParams.set('min-time', minTimestamp);
+      if (maxTimestamp) searchParams.set('max-time', maxTimestamp);
+      if (currency) searchParams.set('currency', currency);
+      if (sort) searchParams.set('sort', sort);
+      if (limit !== 100) searchParams.set('limit', limit.toString());
+      if (nextToken) searchParams.set('next-token', nextToken);
+      const queryString = searchParams.toString();
+      return `${baseUrl}/nft-indexer/v1/mp/sales${queryString ? `?${queryString}` : ''}`;
+    } else if (actualEndpoint === 'mpdeletes') {
+      const searchParams = new URLSearchParams();
+      if (mpContractId) searchParams.set('mpContractId', mpContractId);
+      if (mpListingId) searchParams.set('mpListingId', mpListingId);
+      if (collectionId) searchParams.set('collectionId', collectionId);
+      if (tokenId) searchParams.set('tokenId', tokenId);
+      if (owner) searchParams.set('owner', owner);
+      if (minRound) searchParams.set('min-round', minRound);
+      if (maxRound) searchParams.set('max-round', maxRound);
+      if (minTimestamp) searchParams.set('min-time', minTimestamp);
+      if (maxTimestamp) searchParams.set('max-time', maxTimestamp);
+      if (sort) searchParams.set('sort', sort);
+      if (limit !== 100) searchParams.set('limit', limit.toString());
+      if (nextToken) searchParams.set('next-token', nextToken);
+      const queryString = searchParams.toString();
+      return `${baseUrl}/nft-indexer/v1/mp/deletes${queryString ? `?${queryString}` : ''}`;
     }
     
     return `${baseUrl}`;
@@ -217,6 +288,9 @@ func main() {
           <option value="arc72tokens">ARC72 Tokens</option>
           <option value="arc72transfers">ARC72 Token Transfers</option>
           <option value="arc72collections">ARC72 Collections</option>
+          <option value="mplistings">Marketplace Listings</option>
+          <option value="mpsales">Marketplace Sales</option>
+          <option value="mpdeletes">Marketplace Deletes</option>
         </select>
       </div>
 
@@ -681,6 +755,377 @@ func main() {
             id="nextToken"
             bind:value={nextToken} 
             placeholder="Token for pagination" />
+        </div>
+      {:else if actualEndpoint === 'mplistings'}
+        <div class="input-group">
+          <label for="mpContractId">Marketplace Contract ID (optional)</label>
+          <input 
+            type="number" 
+            id="mpContractId"
+            bind:value={mpContractId} 
+            placeholder="Enter marketplace contract ID" />
+        </div>
+        <div class="input-group">
+          <label for="mpListingId">Listing ID (optional)</label>
+          <input 
+            type="text" 
+            id="mpListingId"
+            bind:value={mpListingId} 
+            placeholder="Enter listing ID" />
+        </div>
+        <div class="input-group">
+          <label for="collectionId">Collection ID (optional)</label>
+          <input 
+            type="text" 
+            id="collectionId"
+            bind:value={collectionId} 
+            placeholder="Enter collection contract ID" />
+        </div>
+        <div class="input-group">
+          <label for="tokenId">Token ID (optional)</label>
+          <input 
+            type="text" 
+            id="tokenId"
+            bind:value={tokenId} 
+            placeholder="Enter token ID" />
+        </div>
+        <div class="input-group">
+          <label for="seller">Seller (optional)</label>
+          <input 
+            type="text" 
+            id="seller"
+            bind:value={seller} 
+            placeholder="Enter seller address" />
+        </div>
+        <div class="input-group">
+          <label for="minRound">Min Round (optional)</label>
+          <input 
+            type="number" 
+            id="minRound"
+            bind:value={minRound} 
+            placeholder="Enter minimum round" />
+        </div>
+        <div class="input-group">
+          <label for="maxRound">Max Round (optional)</label>
+          <input 
+            type="number" 
+            id="maxRound"
+            bind:value={maxRound} 
+            placeholder="Enter maximum round" />
+        </div>
+        <div class="input-group">
+          <label for="minPrice">Min Price (optional)</label>
+          <input 
+            type="number" 
+            id="minPrice"
+            bind:value={minPrice} 
+            placeholder="Enter minimum price" />
+        </div>
+        <div class="input-group">
+          <label for="maxPrice">Max Price (optional)</label>
+          <input 
+            type="number" 
+            id="maxPrice"
+            bind:value={maxPrice} 
+            placeholder="Enter maximum price" />
+        </div>
+        <div class="input-group">
+          <label for="minTimestamp">Min Timestamp (optional)</label>
+          <input 
+            type="number" 
+            id="minTimestamp"
+            bind:value={minTimestamp} 
+            placeholder="Enter minimum timestamp" />
+        </div>
+        <div class="input-group">
+          <label for="maxTimestamp">Max Timestamp (optional)</label>
+          <input 
+            type="number" 
+            id="maxTimestamp"
+            bind:value={maxTimestamp} 
+            placeholder="Enter maximum timestamp" />
+        </div>
+        <div class="input-group">
+          <label for="currency">Currency (optional)</label>
+          <input 
+            type="text" 
+            id="currency"
+            bind:value={currency} 
+            placeholder="Enter currency ID (0 for native token)" />
+        </div>
+        <div class="input-group">
+          <label for="active">Active (optional)</label>
+          <select id="active" bind:value={active}>
+            <option value="">Select</option>
+            <option value="true">True</option>
+            <option value="false">False</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="sold">Sold (optional)</label>
+          <select id="sold" bind:value={sold}>
+            <option value="">Select</option>
+            <option value="true">True</option>
+            <option value="false">False</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="deleted">Deleted (optional)</label>
+          <select id="deleted" bind:value={deleted}>
+            <option value="">Select</option>
+            <option value="true">True</option>
+            <option value="false">False</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="limit">Limit (optional)</label>
+          <input 
+            type="number" 
+            id="limit"
+            bind:value={limit} 
+            placeholder="Enter result limit" />
+        </div>
+        <div class="input-group">
+          <label for="nextToken">Next Token (optional)</label>
+          <input 
+            type="text" 
+            id="nextToken"
+            bind:value={nextToken} 
+            placeholder="Enter pagination token" />
+        </div>
+      {:else if actualEndpoint === 'mpsales'}
+        <div class="input-group">
+          <label for="mpContractId">Marketplace Contract ID (optional)</label>
+          <input 
+            type="number" 
+            id="mpContractId"
+            bind:value={mpContractId} 
+            placeholder="Enter marketplace contract ID" />
+        </div>
+        <div class="input-group">
+          <label for="mpListingId">Listing ID (optional)</label>
+          <input 
+            type="text" 
+            id="mpListingId"
+            bind:value={mpListingId} 
+            placeholder="Enter listing ID" />
+        </div>
+        <div class="input-group">
+          <label for="collectionId">Collection ID (optional)</label>
+          <input 
+            type="text" 
+            id="collectionId"
+            bind:value={collectionId} 
+            placeholder="Enter collection contract ID" />
+        </div>
+        <div class="input-group">
+          <label for="tokenId">Token ID (optional)</label>
+          <input 
+            type="text" 
+            id="tokenId"
+            bind:value={tokenId} 
+            placeholder="Enter token ID" />
+        </div>
+        <div class="input-group">
+          <label for="seller">Seller (optional)</label>
+          <input 
+            type="text" 
+            id="seller"
+            bind:value={seller} 
+            placeholder="Enter seller address" />
+        </div>
+        <div class="input-group">
+          <label for="buyer">Buyer (optional)</label>
+          <input 
+            type="text" 
+            id="buyer"
+            bind:value={buyer} 
+            placeholder="Enter buyer address" />
+        </div>
+        <div class="input-group">
+          <label for="user">User (optional)</label>
+          <input 
+            type="text" 
+            id="user"
+            bind:value={user} 
+            placeholder="Enter user address (seller or buyer)" />
+        </div>
+        <div class="input-group">
+          <label for="minRound">Min Round (optional)</label>
+          <input 
+            type="number" 
+            id="minRound"
+            bind:value={minRound} 
+            placeholder="Enter minimum round" />
+        </div>
+        <div class="input-group">
+          <label for="maxRound">Max Round (optional)</label>
+          <input 
+            type="number" 
+            id="maxRound"
+            bind:value={maxRound} 
+            placeholder="Enter maximum round" />
+        </div>
+        <div class="input-group">
+          <label for="minPrice">Min Price (optional)</label>
+          <input 
+            type="number" 
+            id="minPrice"
+            bind:value={minPrice} 
+            placeholder="Enter minimum price" />
+        </div>
+        <div class="input-group">
+          <label for="maxPrice">Max Price (optional)</label>
+          <input 
+            type="number" 
+            id="maxPrice"
+            bind:value={maxPrice} 
+            placeholder="Enter maximum price" />
+        </div>
+        <div class="input-group">
+          <label for="minTimestamp">Min Timestamp (optional)</label>
+          <input 
+            type="number" 
+            id="minTimestamp"
+            bind:value={minTimestamp} 
+            placeholder="Enter minimum timestamp" />
+        </div>
+        <div class="input-group">
+          <label for="maxTimestamp">Max Timestamp (optional)</label>
+          <input 
+            type="number" 
+            id="maxTimestamp"
+            bind:value={maxTimestamp} 
+            placeholder="Enter maximum timestamp" />
+        </div>
+        <div class="input-group">
+          <label for="currency">Currency (optional)</label>
+          <input 
+            type="text" 
+            id="currency"
+            bind:value={currency} 
+            placeholder="Enter currency ID (0 for native token)" />
+        </div>
+        <div class="input-group">
+          <label for="sort">Sort Order (optional)</label>
+          <select id="sort" bind:value={sort}>
+            <option value="">Select</option>
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="limit">Limit (optional)</label>
+          <input 
+            type="number" 
+            id="limit"
+            bind:value={limit} 
+            placeholder="Enter result limit" />
+        </div>
+        <div class="input-group">
+          <label for="nextToken">Next Token (optional)</label>
+          <input 
+            type="text" 
+            id="nextToken"
+            bind:value={nextToken} 
+            placeholder="Enter pagination token" />
+        </div>
+      {:else if actualEndpoint === 'mpdeletes'}
+        <div class="input-group">
+          <label for="mpContractId">Marketplace Contract ID (optional)</label>
+          <input 
+            type="number" 
+            id="mpContractId"
+            bind:value={mpContractId} 
+            placeholder="Enter marketplace contract ID" />
+        </div>
+        <div class="input-group">
+          <label for="mpListingId">Listing ID (optional)</label>
+          <input 
+            type="text" 
+            id="mpListingId"
+            bind:value={mpListingId} 
+            placeholder="Enter listing ID" />
+        </div>
+        <div class="input-group">
+          <label for="collectionId">Collection ID (optional)</label>
+          <input 
+            type="text" 
+            id="collectionId"
+            bind:value={collectionId} 
+            placeholder="Enter collection contract ID" />
+        </div>
+        <div class="input-group">
+          <label for="tokenId">Token ID (optional)</label>
+          <input 
+            type="text" 
+            id="tokenId"
+            bind:value={tokenId} 
+            placeholder="Enter token ID" />
+        </div>
+        <div class="input-group">
+          <label for="owner">Owner (optional)</label>
+          <input 
+            type="text" 
+            id="owner"
+            bind:value={owner} 
+            placeholder="Enter owner address" />
+        </div>
+        <div class="input-group">
+          <label for="minRound">Min Round (optional)</label>
+          <input 
+            type="number" 
+            id="minRound"
+            bind:value={minRound} 
+            placeholder="Enter minimum round" />
+        </div>
+        <div class="input-group">
+          <label for="maxRound">Max Round (optional)</label>
+          <input 
+            type="number" 
+            id="maxRound"
+            bind:value={maxRound} 
+            placeholder="Enter maximum round" />
+        </div>
+        <div class="input-group">
+          <label for="minTimestamp">Min Timestamp (optional)</label>
+          <input 
+            type="number" 
+            id="minTimestamp"
+            bind:value={minTimestamp} 
+            placeholder="Enter minimum timestamp" />
+        </div>
+        <div class="input-group">
+          <label for="maxTimestamp">Max Timestamp (optional)</label>
+          <input 
+            type="number" 
+            id="maxTimestamp"
+            bind:value={maxTimestamp} 
+            placeholder="Enter maximum timestamp" />
+        </div>
+        <div class="input-group">
+          <label for="sort">Sort Order (optional)</label>
+          <select id="sort" bind:value={sort}>
+            <option value="">Select</option>
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="limit">Limit (optional)</label>
+          <input 
+            type="number" 
+            id="limit"
+            bind:value={limit} 
+            placeholder="Enter result limit" />
+        </div>
+        <div class="input-group">
+          <label for="nextToken">Next Token (optional)</label>
+          <input 
+            type="text" 
+            id="nextToken"
+            bind:value={nextToken} 
+            placeholder="Enter pagination token" />
         </div>
       {/if}
 

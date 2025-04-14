@@ -8,7 +8,7 @@
   let activeTab = 'docs';
   let selectedEndpoint: string | undefined = undefined;
   let searchQuery = '';
-  let selectedCategory = 'all';
+  let selectedCategory: string | undefined = undefined;
   
   // Using a Record to properly type the endpoint refs object
   let endpointRefs: Record<string, HTMLElement> = {};
@@ -18,7 +18,6 @@
   
   // Group endpoints by their path prefix (e.g., /arc200/*)
   const categories = [
-    { id: 'all', name: 'All Endpoints' },
     ...Array.from(new Set(endpoints.map(e => e.path.split('/')[1])))
       .map(category => ({
         id: category,
@@ -28,26 +27,22 @@
 
   // Group endpoints by category
   const endpointsByCategory = categories.reduce((acc, category) => {
-    if (category.id === 'all') {
-      acc[category.id] = endpoints;
-    } else {
-      acc[category.id] = endpoints.filter(endpoint => 
-        endpoint.path.startsWith(`/${category.id}`)
-      );
-    }
+    acc[category.id] = endpoints.filter(endpoint => 
+      endpoint.path.startsWith(`/${category.id}`)
+    );
     return acc;
   }, {} as Record<string, typeof endpoints>);
 
   $: filteredEndpoints = endpoints.filter(endpoint => {
-    // Filter by category
-    const matchesCategory = selectedCategory === 'all' || 
-                           endpoint.path.startsWith(`/${selectedCategory}`);
+    // Filter by category if one is selected
+    const matchesCategory = selectedCategory === undefined || 
+                        endpoint.path.startsWith(`/${selectedCategory}`);
     
     // Filter by search query
     const matchesSearch = searchQuery === '' || 
-                         endpoint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         endpoint.path.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         endpoint.description.toLowerCase().includes(searchQuery.toLowerCase());
+                        endpoint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        endpoint.path.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        endpoint.description.toLowerCase().includes(searchQuery.toLowerCase());
     
     return matchesCategory && matchesSearch;
   });
@@ -282,54 +277,38 @@
           
           <nav class="categories">
             {#each categories as category}
-              {#if category.id !== 'all'}
-                <div class="category-section">
-                  <button 
-                    class:active={selectedCategory === category.id || selectedCategory === 'all'}
-                    on:click={() => selectedCategory = category.id}
-                    class="category-button"
-                  >
-                    {category.name}
-                  </button>
-                  
-                  {#if selectedCategory === 'all' || selectedCategory === category.id}
-                    {@const filteredCategoryEndpoints = endpointsByCategory[category.id].filter(endpoint => {
-                      return searchQuery === '' || 
-                        endpoint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        endpoint.path.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        endpoint.description.toLowerCase().includes(searchQuery.toLowerCase());
-                    })}
-                    
-                    {#if filteredCategoryEndpoints.length > 0}
-                      <ul class="endpoint-list">
-                        {#each filteredCategoryEndpoints as endpoint}
-                          <li>
-                            <button 
-                              class:active={activeEndpointId === endpoint.endpoint}
-                              on:click={() => goToDocumentation(endpoint.endpoint)}
-                              class="endpoint-button"
-                            >
-                              {endpoint.title}
-                            </button>
-                          </li>
-                        {/each}
-                      </ul>
-                    {/if}
-                  {/if}
-                </div>
-              {:else}
+              <div class="category-section">
                 <button 
-                  class:active={selectedCategory === 'all'}
-                  on:click={() => selectedCategory = 'all'}
-                  class="category-button all-button"
+                  class:active={selectedCategory === category.id}
+                  on:click={() => selectedCategory = selectedCategory === category.id ? undefined : category.id}
+                  class="category-button"
                 >
-                  All Endpoints
+                  {category.name}
                 </button>
-              {/if}
+                
+                <ul class="endpoint-list">
+                  {#each endpointsByCategory[category.id].filter(endpoint => 
+                    searchQuery === '' || 
+                    endpoint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    endpoint.path.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    endpoint.description.toLowerCase().includes(searchQuery.toLowerCase())
+                  ) as endpoint}
+                    <li>
+                      <button 
+                        class:active={activeEndpointId === endpoint.endpoint}
+                        on:click={() => goToDocumentation(endpoint.endpoint)}
+                        class="endpoint-button"
+                      >
+                        {endpoint.title}
+                      </button>
+                    </li>
+                  {/each}
+                </ul>
+              </div>
             {/each}
             
             {#if searchQuery && !categories.some(category => 
-              category.id !== 'all' && endpointsByCategory[category.id].some(endpoint => 
+              endpointsByCategory[category.id].some(endpoint => 
                 endpoint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 endpoint.path.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 endpoint.description.toLowerCase().includes(searchQuery.toLowerCase())
@@ -345,6 +324,7 @@
             <div class="version">
               <h3>Recent Changes</h3>
               <ul>
+                <li>2025-04-14: Added Marketplace API endpoints.</li>
                 <li>2025-04-11: Added ARC72 tokens API endpoints.</li>
                 <li>2024-04-08: Added ARC200 token approvals API endpoint.</li>
                 <li>2024-04-04: Added ARC200 tokens API endpoint.</li>
@@ -588,6 +568,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .category-button {
@@ -599,7 +580,8 @@
     border-radius: 4px;
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
-    font-weight: 500;
+    font-weight: 600;
+    border: 1px solid var(--border-color);
   }
 
   .category-button:hover {
@@ -608,18 +590,6 @@
 
   .category-button.active {
     background: var(--accent-color);
-    color: white;
-  }
-
-  .all-button {
-    margin-bottom: 1rem;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    font-weight: 600;
-  }
-  
-  .all-button.active {
-    background-color: var(--accent-color);
     color: white;
     border-color: var(--accent-color);
   }
