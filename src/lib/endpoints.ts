@@ -205,20 +205,7 @@ const arc200Tokens = {
       "deleted": 0,
       "verified": 1,
       "mintRound": 4224601,
-      "globalState": {
-        "creator": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "approvalProgram": "...",
-        "clearStateProgram": "...",
-        "globalStateSchema": {
-          "numUint": 0,
-          "numByteSlice": 0
-        },
-        "localStateSchema": {
-          "numUint": 0,
-          "numByteSlice": 0
-        },
-        "extraProgramPages": 0
-      }
+      "globalState": []
     }
   ]
 }`
