@@ -61,6 +61,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     const includes = url.searchParams.get('includes');
     const limit = url.searchParams.get('limit');
     const nextToken = url.searchParams.get('next-token');
+    const name = url.searchParams.get('name');
 
     // Create parameters object for RPC call
     const queryParams: Record<string, any> = {};
@@ -74,6 +75,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     if (includes) queryParams.includes = includes;
     if (limit) queryParams.limit = parseInt(limit);
     if (nextToken) queryParams['next-token'] = nextToken;
+    if (name) queryParams.name = name;
 
     // Call the RPC function with the params parameter
     const { data, error } = await supabase

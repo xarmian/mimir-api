@@ -456,6 +456,12 @@ const arc72Collections = {
         required: false
       },
       {
+        name: 'name',
+        type: 'string',
+        description: 'Filter by collection name',
+        required: false
+      },
+      {
         name: 'verified',
         type: 'number',
         description: 'Filter for verified collections (1) or unverified collections (0)',

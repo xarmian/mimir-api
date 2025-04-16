@@ -27,6 +27,7 @@
   let approved = '';
   let blacklisted = '';
   let creator = '';
+  let name = '';
   let mintMinRound = '';
   let mintMaxRound = '';
   // Marketplace specific fields
@@ -122,6 +123,7 @@
     } else if (actualEndpoint === 'arc72collections') {
       const searchParams = new URLSearchParams();
       if (contractId) searchParams.set('contractId', contractId);
+      if (name) searchParams.set('name', name);
       if (verified) searchParams.set('verified', verified);
       if (blacklisted) searchParams.set('blacklisted', blacklisted);
       if (creator) searchParams.set('creator', creator);
@@ -689,6 +691,14 @@ func main() {
             id="contractId"
             bind:value={contractId} 
             placeholder="Enter ARC72 contract ID" />
+        </div>
+        <div class="input-group">
+          <label for="name">Collection Name (optional)</label>
+          <input 
+            type="text" 
+            id="name"
+            bind:value={name} 
+            placeholder="Filter by collection name" />
         </div>
         <div class="input-group">
           <label for="verified">Verified (optional)</label>
