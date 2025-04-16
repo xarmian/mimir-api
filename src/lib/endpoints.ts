@@ -314,6 +314,12 @@ const arc72Tokens = {
         required: false
       },
       {
+        name: 'isBurned',
+        type: 'boolean',
+        description: 'Filter by burned status',
+        required: false
+      },
+      {
         name: 'limit',
         type: 'number',
         description: 'Maximum number of results to return',

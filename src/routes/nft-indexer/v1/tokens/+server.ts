@@ -58,6 +58,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     const tokenIds = url.searchParams.get('tokenIds');
     const approved = url.searchParams.get('approved');
     const round = url.searchParams.get('round');
+    const isBurned = url.searchParams.get('isBurned');
     const limit = url.searchParams.get('limit');
     const nextToken = url.searchParams.get('next-token');
 
@@ -70,6 +71,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     if (tokenIds) queryParams.tokenIds = tokenIds;
     if (approved) queryParams.approved = approved;
     if (round) queryParams.round = round;
+    if (isBurned) queryParams.isBurned = isBurned;
     if (limit) queryParams.limit = parseInt(limit);
     if (nextToken) queryParams['next-token'] = nextToken;
 

@@ -28,6 +28,7 @@
   let blacklisted = '';
   let creator = '';
   let name = '';
+  let isBurned = '';
   let mintMinRound = '';
   let mintMaxRound = '';
   // Marketplace specific fields
@@ -100,6 +101,7 @@
       if (tokenIds) searchParams.set('tokenIds', tokenIds);
       if (approved) searchParams.set('approved', approved);
       if (round) searchParams.set('round', round);
+      if (isBurned) searchParams.set('isBurned', isBurned);
       if (limit !== 100) searchParams.set('limit', limit.toString());
       if (nextToken) searchParams.set('next-token', nextToken);
       const queryString = searchParams.toString();
@@ -565,6 +567,14 @@ func main() {
             id="round"
             bind:value={round} 
             placeholder="Specific round number" />
+        </div>
+        <div class="input-group">
+          <label for="isBurned">Is Burned (optional)</label>
+          <select id="isBurned" bind:value={isBurned}>
+            <option value="">All tokens</option>
+            <option value="true">Burned only</option>
+            <option value="false">Not burned only</option>
+          </select>
         </div>
         <div class="input-group">
           <label for="limit">Result Limit (optional)</label>
