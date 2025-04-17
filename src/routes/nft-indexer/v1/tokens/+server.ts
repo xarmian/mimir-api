@@ -23,11 +23,18 @@ export const OPTIONS: RequestHandler = async () => {
 export const POST: RequestHandler = async ({ request }: { request: Request }) => {
   try {
     // Get parameters from request body
+    // Supports all parameters including:
+    // - contractId: contract address
+    // - tokenId: specific token ID
+    // - owner: token owner address
+    // - metadataText: string to search across all metadata fields
+    // - metadataSearch: object with key-value pairs to match in metadata
+    // Example: {"contractId": 398078, "metadataText": "Bored", "metadataSearch": {"properties.BACKGROUND": "Orange"}}
     const requestParams = await request.json();
     
     // Call the RPC function with a single JSON parameter
     const { data, error } = await supabase
-      .rpc('get_arc72_tokens', {
+      .rpc('arc72_get_tokens', {
         params: requestParams
       });
 
@@ -62,6 +69,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     const limit = url.searchParams.get('limit');
     const nextToken = url.searchParams.get('next-token');
     const metadataSearch = url.searchParams.get('metadataSearch');
+    const metadataText = url.searchParams.get('metadataText');
 
     // Create parameters object for RPC call
     const queryParams: Record<string, any> = {};
@@ -75,22 +83,21 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     if (isBurned) queryParams.isBurned = isBurned;
     if (limit) queryParams.limit = parseInt(limit);
     if (nextToken) queryParams['next-token'] = nextToken;
+    if (metadataText) queryParams.metadataText = metadataText;
     
-    // Handle metadata search in two ways:
-    // 1. Simple string search with metadataSearch parameter
+    // Handle structured metadata search
     if (metadataSearch) {
       try {
         // Check if it's a JSON string that can be parsed
         const parsedMetadata = JSON.parse(metadataSearch);
         queryParams.metadataSearch = parsedMetadata;
       } catch (e) {
-        // If not valid JSON, use as a simple string search
-        queryParams.metadataSearch = metadataSearch;
+        console.error('Invalid JSON in metadataSearch:', e);
+        // If not valid JSON, ignore it
       }
     }
     
-    // 2. Multiple key-value pairs from URL parameters
-    // Find all parameters that start with "metadata."
+    // Collect multiple key-value pairs from URL parameters
     const metadataParams: Record<string, string> = {};
     let hasMetadataParams = false;
     
