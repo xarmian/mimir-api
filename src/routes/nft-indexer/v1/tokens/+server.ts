@@ -62,8 +62,6 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     const limit = url.searchParams.get('limit');
     const nextToken = url.searchParams.get('next-token');
     const metadataSearch = url.searchParams.get('metadataSearch');
-    const metadataSearchKey = url.searchParams.get('metadataSearchKey');
-    const metadataSearchValue = url.searchParams.get('metadataSearchValue');
 
     // Create parameters object for RPC call
     const queryParams: Record<string, any> = {};
@@ -81,14 +79,33 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     // Handle metadata search in two ways:
     // 1. Simple string search with metadataSearch parameter
     if (metadataSearch) {
-      queryParams.metadataSearch = metadataSearch;
+      try {
+        // Check if it's a JSON string that can be parsed
+        const parsedMetadata = JSON.parse(metadataSearch);
+        queryParams.metadataSearch = parsedMetadata;
+      } catch (e) {
+        // If not valid JSON, use as a simple string search
+        queryParams.metadataSearch = metadataSearch;
+      }
     }
     
-    // 2. Key-value search with metadataSearchKey and metadataSearchValue parameters
-    if (metadataSearchKey && metadataSearchValue) {
-      queryParams.metadataSearch = {
-        [metadataSearchKey]: metadataSearchValue
-      };
+    // 2. Multiple key-value pairs from URL parameters
+    // Find all parameters that start with "metadata."
+    const metadataParams: Record<string, string> = {};
+    let hasMetadataParams = false;
+    
+    for (const [key, value] of url.searchParams.entries()) {
+      if (key.startsWith('metadata.') && value) {
+        const metadataKey = key.substring('metadata.'.length);
+        metadataParams[metadataKey] = value;
+        hasMetadataParams = true;
+      }
+    }
+    
+    // Only set metadataSearch from URL parameters if we have some
+    // and the metadataSearch parameter wasn't explicitly provided
+    if (hasMetadataParams && !metadataSearch) {
+      queryParams.metadataSearch = metadataParams;
     }
 
     // Call the RPC function with the params parameter
