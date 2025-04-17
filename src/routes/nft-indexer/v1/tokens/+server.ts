@@ -61,6 +61,9 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     const isBurned = url.searchParams.get('isBurned');
     const limit = url.searchParams.get('limit');
     const nextToken = url.searchParams.get('next-token');
+    const metadataSearch = url.searchParams.get('metadataSearch');
+    const metadataSearchKey = url.searchParams.get('metadataSearchKey');
+    const metadataSearchValue = url.searchParams.get('metadataSearchValue');
 
     // Create parameters object for RPC call
     const queryParams: Record<string, any> = {};
@@ -74,10 +77,23 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     if (isBurned) queryParams.isBurned = isBurned;
     if (limit) queryParams.limit = parseInt(limit);
     if (nextToken) queryParams['next-token'] = nextToken;
+    
+    // Handle metadata search in two ways:
+    // 1. Simple string search with metadataSearch parameter
+    if (metadataSearch) {
+      queryParams.metadataSearch = metadataSearch;
+    }
+    
+    // 2. Key-value search with metadataSearchKey and metadataSearchValue parameters
+    if (metadataSearchKey && metadataSearchValue) {
+      queryParams.metadataSearch = {
+        [metadataSearchKey]: metadataSearchValue
+      };
+    }
 
     // Call the RPC function with the params parameter
     const { data, error } = await supabase
-      .rpc('get_arc72_tokens', {
+      .rpc('arc72_get_tokens', {
         params: queryParams
       });
 
