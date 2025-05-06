@@ -34,8 +34,8 @@ export const POST: RequestHandler = async ({ request }) => {
 
     const { data: rpcResponse, error: rpcError } = await supabase
       .rpc('should_refresh', {
-        addresses: account_addresses, 
-        last_known_round: last_known_round
+        p_account_addresses: account_addresses,
+        p_round_number: last_known_round
       });
 
     if (rpcError) {
