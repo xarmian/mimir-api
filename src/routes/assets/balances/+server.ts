@@ -19,7 +19,7 @@ export const OPTIONS: RequestHandler = async () => {
   });
 };
 
-// Handle POST request for ARC200 approvals with JSON body
+// Handle POST request for ARC200 balances with JSON body
 export const POST: RequestHandler = async ({ request }: { request: Request }) => {
   try {
     // Get parameters from request body
@@ -27,7 +27,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
     
     // Call the RPC function with a single JSON parameter
     const { data, error } = await supabase
-      .rpc('get_arc200_approvals', {
+      .rpc('get_asset_balances', {
         params: requestParams
       });
 
@@ -48,13 +48,14 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
   }
 };
 
-// Handle GET request for ARC200 approvals
+// Handle GET request for ARC200 balances
 export const GET: RequestHandler = async ({ url }: { url: URL }) => {
   try {
     // Get query parameters
     const contractId = url.searchParams.get('contractId');
-    const owner = url.searchParams.get('owner');
-    const spender = url.searchParams.get('spender');
+    const accountId = url.searchParams.get('accountId');
+    const symbol = url.searchParams.get('symbol');
+    const verified = url.searchParams.get('verified');
     const limit = url.searchParams.get('limit');
     const nextToken = url.searchParams.get('next-token');
 
@@ -62,14 +63,15 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     const queryParams: Record<string, any> = {};
     
     if (contractId) queryParams.contractId = parseInt(contractId);
-    if (owner) queryParams.owner = owner;
-    if (spender) queryParams.spender = spender;
+    if (accountId) queryParams.accountId = accountId;
+    if (symbol) queryParams.symbol = symbol;
+    if (verified !== null) queryParams.verified = parseInt(verified);
     if (limit) queryParams.limit = parseInt(limit);
     if (nextToken) queryParams['next-token'] = nextToken;
 
     // Call the RPC function with the params parameter
     const { data, error } = await supabase
-      .rpc('get_arc200_approvals', {
+      .rpc('get_asset_balances', {
         params: queryParams
       });
 
@@ -82,7 +84,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     return json(data, { headers: corsHeaders });
     
   } catch (error) {
-    console.error('Error fetching ARC200 approvals:', error);
+    console.error('Error fetching ARC200 balances:', error);
     return json({ error: 'Internal server error' }, { 
       status: 500,
       headers: corsHeaders
