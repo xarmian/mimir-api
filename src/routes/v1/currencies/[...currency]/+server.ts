@@ -22,6 +22,27 @@ async function fetchCurrencyData(currencyCode: string): Promise<any> {
   return response.json();
 }
 
+// Helper function to format numbers without exponential notation
+function formatNumber(num: number): string {
+  const str = num.toString();
+  if (str.includes('e')) {
+    const [mantissa, exponent] = str.split('e');
+    const exp = parseInt(exponent, 10);
+    let result = mantissa.replace('.', '');
+    const decimalPos = mantissa.indexOf('.');
+    const digitsAfterDecimal = decimalPos === -1 ? 0 : mantissa.length - decimalPos - 1;
+    if (exp > 0) {
+      result += '0'.repeat(exp - digitsAfterDecimal);
+    } else {
+      const totalDecimals = Math.abs(exp) + digitsAfterDecimal;
+      result = '0.' + '0'.repeat(Math.abs(exp) - 1) + result;
+      result = result.slice(0, totalDecimals + 2); // +2 for '0.'
+    }
+    return result;
+  }
+  return str;
+}
+
 // Handle OPTIONS request for CORS preflight
 export const OPTIONS: RequestHandler = async () => {
   return new Response(null, {
@@ -184,9 +205,9 @@ export const GET: RequestHandler = async (event) => {
       generated_at: formattedTimestamp,
       currency_id: requestedCurrency,
       name: currencyName,
-      symbol: currencySymbol, 
+      symbol: currencySymbol,
       usd_value: usdValueForRequestedCurrency, // How much 1 unit of this currency is worth in USD
-      exchange_price: exchangePriceInRequestedCurrency, // ARC200 token price in this currency
+      exchange_price: formatNumber(exchangePriceInRequestedCurrency), // ARC200 token price in this currency
       last_updated_at: formattedTimestamp, // Or API's date if available and preferred
       s: "cb", // Assuming 'cb' stands for 'currency beacon' or similar source
       last_24_hours_price_change_percentage: last24HoursPriceChangePercentage
