@@ -38,13 +38,49 @@ export const GET: RequestHandler = async (event) => {
 
     // Case 1: No currency provided (e.g., from /v1/currencies//)
     if (!currencyParam) {
-      const supportedCurrenciesList = Object.entries(allCurrencies).map(([id, name]) => ({
-        generated_at: formattedTimestamp,
-        currency_id: id.toUpperCase(),
-        name: name || id.toUpperCase(), // Use ID if name is empty
-        symbol: id.toUpperCase() // Assuming symbol is same as ID, adjust if needed
+      const allCurrencyObjects = Object.entries(allCurrencies).map(([id, name]) => {
+        let symbol = id.toUpperCase();
+        if (id.toLowerCase() === 'usd') {
+          symbol = '$';
+        }
+        else if (id.toLowerCase() === 'eur') {
+          symbol = '€';
+        }
+        return {
+          currency_id: id.toUpperCase(),
+          name: name || id.toUpperCase(), // Use ID if name from json is empty
+          symbol: symbol
+        };
+      });
+
+      let usdItem: any = null;
+      let eurItem: any = null;
+      const otherItems: any[] = [];
+
+      for (const item of allCurrencyObjects) {
+        if (item.currency_id === 'USD') {
+          usdItem = item;
+        } else if (item.currency_id === 'EUR') {
+          eurItem = item;
+        } else {
+          otherItems.push(item);
+        }
+      }
+
+      // Sort other items alphabetically by currency_id
+      otherItems.sort((a, b) => a.currency_id.localeCompare(b.currency_id));
+
+      const sortedPrefixedList = [];
+      if (usdItem) sortedPrefixedList.push(usdItem);
+      if (eurItem) sortedPrefixedList.push(eurItem);
+      sortedPrefixedList.push(...otherItems);
+      
+      const finalListWithTimestamp = sortedPrefixedList.map(item => ({
+        ...item,
+        generated_at: formattedTimestamp
       }));
-      return json(supportedCurrenciesList, { headers: corsHeaders });
+
+      return json(finalListWithTimestamp, { headers: corsHeaders });
     }
 
     const requestedCurrency = currencyParam.toUpperCase();
@@ -134,7 +170,15 @@ export const GET: RequestHandler = async (event) => {
     const currencyName = allCurrencies[requestedCurrency.toLowerCase() as keyof typeof allCurrencies] || requestedCurrency;
     // Attempt to find a symbol, default to currency code.
     // This part might need a more robust way to get currency symbols if they aren't just the code.
-    const currencySymbol = (requestedCurrency === 'USD') ? '$' : requestedCurrency;
+    let currencySymbol = requestedCurrency;
+    switch (requestedCurrency.toLowerCase()) {
+      case 'usd':
+        currencySymbol = '$';
+        break;
+      case 'eur':
+        currencySymbol = '€';
+        break;
+    }
 
     const responseData = {
       generated_at: formattedTimestamp,
