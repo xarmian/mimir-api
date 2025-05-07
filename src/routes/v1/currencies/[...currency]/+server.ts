@@ -165,7 +165,7 @@ export const GET: RequestHandler = async (event) => {
 
       // usdValueForRequestedCurrency: How many USD 1 unit of the requested_currency is worth.
       // e.g., if 1 USD = 0.93 EUR (rateOfTargetPerUsd for EUR is 0.93), then 1 EUR = 1/0.93 USD.
-      usdValueForRequestedCurrency = 1 / rateOfTargetPerUsd;
+      usdValueForRequestedCurrency = rateOfTargetPerUsd;
 
       // exchangePriceInRequestedCurrency: ARC200 token's price in the requested_currency.
       // e.g., token_price_in_usd * (EUR_per_USD) = token_price_in_EUR
