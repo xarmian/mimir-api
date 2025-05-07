@@ -89,11 +89,8 @@ export const GET: RequestHandler = async (event) => {
     if (!currencyParam) {
       const allCurrencyObjects = Object.entries(allCurrencies).map(([id, name]) => {
         let symbol = id.toUpperCase();
-        if (id.toLowerCase() === 'usd') {
-          symbol = '$';
-        }
-        else if (id.toLowerCase() === 'eur') {
-          symbol = '€';
+        if (symbols[id as keyof typeof symbols]) {
+          symbol = symbols[id as keyof typeof symbols];
         }
         return {
           currency_id: id.toUpperCase(),
