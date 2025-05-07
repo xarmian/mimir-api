@@ -41,18 +41,40 @@ export const GET: RequestHandler = async (event) => {
 
     // Case 2: Currency is USD
     if (currency.toUpperCase() === 'USD') {
-      // Call the RPC function with the p_input_asset_id parameter
-      const { data: exchangePrice, error: rpcError } = await supabase
+      const now = new Date();
+      const timestamp24HoursAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+
+      // Get current exchange price
+      const { data: currentExchangePrice, error: currentPriceError } = await supabase
         .rpc('calculate_token_usd_value', {
           p_input_asset_id: 390001
         });
 
-      if (rpcError) {
-        console.error('Supabase RPC error:', rpcError);
-        throw rpcError;
+      if (currentPriceError) {
+        console.error('Supabase RPC error (current price):', currentPriceError);
+        throw currentPriceError;
       }
 
-      const now = new Date();
+      // Get exchange price from 24 hours ago
+      const { data: pastExchangePrice, error: pastPriceError } = await supabase
+        .rpc('calculate_token_usd_value', {
+          p_input_asset_id: 390001,
+          p_timestamp: timestamp24HoursAgo.toISOString()
+        });
+
+      if (pastPriceError) {
+        console.error('Supabase RPC error (past price):', pastPriceError);
+        // Decide if you want to throw or handle this differently, e.g., return 0% change
+        throw pastPriceError; 
+      }
+
+      let last24HoursPriceChangePercentage = 0;
+      if (pastExchangePrice !== null && pastExchangePrice !== 0) {
+        last24HoursPriceChangePercentage = ((currentExchangePrice - pastExchangePrice) / pastExchangePrice);
+      } else if (currentExchangePrice > 0) {
+         last24HoursPriceChangePercentage = currentExchangePrice > 0 ? 1 : 0; // Simplified: 100% if new and positive, else 0
+      }
+
       const formattedTimestamp = now.toISOString().replace('T', ' ').substring(0, 19);
 
       const responseData = {
@@ -61,10 +83,10 @@ export const GET: RequestHandler = async (event) => {
         name: "US Dollar",
         symbol: "$",
         usd_value: 1,
-        exchange_price: exchangePrice,
+        exchange_price: currentExchangePrice,
         last_updated_at: formattedTimestamp,
         s: "cb",
-        last_24_hours_price_change_percentage: 0 // Preserving user's update
+        last_24_hours_price_change_percentage: last24HoursPriceChangePercentage
       };
 
       return json(responseData, { headers: corsHeaders });
