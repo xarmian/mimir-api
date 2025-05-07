@@ -30,7 +30,9 @@ const symbols = {
   "ZAR": "R",
   "BTC": "₿",
   "ETH": "Ξ",
-  "LTC": "Ł"  
+  "LTC": "Ł",
+  "XTZ": "ꜩ",
+  "ADA": "₳",
 }
 
 const corsHeaders = {
