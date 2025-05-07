@@ -7,6 +7,32 @@ import allCurrencies from './currencies.json'; // Import the updated currencies
 
 const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 
+const symbols = {
+  "USD": "$",
+  "EUR": "€",
+  "GBP": "£",
+  "JPY": "¥",
+  "CHF": "₣",
+  "CAD": "$",
+  "AUD": "$",
+  "NZD": "$",
+  "INR": "₹",
+  "RUB": "₽",
+  "BRL": "R$",
+  "ARS": "$",
+  "CLP": "$",
+  "COP": "$",
+  "MXN": "$",
+  "PEN": "S/",
+  "UYU": "$",
+  "VEF": "Bs",
+  "VND": "₫",
+  "ZAR": "R",
+  "BTC": "₿",
+  "ETH": "Ξ",
+  "LTC": "Ł"  
+}
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -192,13 +218,8 @@ export const GET: RequestHandler = async (event) => {
     // Attempt to find a symbol, default to currency code.
     // This part might need a more robust way to get currency symbols if they aren't just the code.
     let currencySymbol = requestedCurrency;
-    switch (requestedCurrency.toLowerCase()) {
-      case 'usd':
-        currencySymbol = '$';
-        break;
-      case 'eur':
-        currencySymbol = '€';
-        break;
+    if (symbols[requestedCurrency as keyof typeof symbols]) {
+      currencySymbol = symbols[requestedCurrency as keyof typeof symbols];
     }
 
     const responseData = {
