@@ -41,6 +41,11 @@ function prepareRpcParams(params: Record<string, any>): Record<string, any> {
     rpcParams.nextToken = String(params.nextToken);
   }
 
+  // Pass exchange as string if present
+  if (params.exchange !== undefined && params.exchange !== null) {
+    rpcParams.exchange = String(params.exchange);
+  }
+
   // Handle limit with default, min, and max constraints
   const defaultLimit = 50;
   const minLimit = 1;
