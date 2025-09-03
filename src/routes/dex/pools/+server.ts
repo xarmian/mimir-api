@@ -108,6 +108,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     const queryParams = {
       poolId: url.searchParams.get('poolId'),
       tokenId: url.searchParams.get('tokenId'),
+      exchange: url.searchParams.get('exchange'),
       nextToken: url.searchParams.get('nextToken'),
       limit: url.searchParams.get('limit')
     };
