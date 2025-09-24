@@ -312,7 +312,7 @@ const data = {
                 "rank": 5,
                 "rtp_rank": 6,
                 "rtp_percent": 92.80,
-                "streak_rank": 3,
+                "streak_rank": 1,
                 "total_spins": 35161,
                 "volume_rank": 5,
                 "total_volume": 991432000000,
