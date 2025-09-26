@@ -21,7 +21,7 @@ const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 
 export const GET: RequestHandler = async ({ url }) => {
   try {
-    const wallet_address = url.searchParams.get('address');
+    const wallet_address = url.searchParams.get('accountId');
 
     if (!wallet_address || wallet_address.trim() === '') {
       return json({ error: 'Missing or invalid address parameter: Must be a non-empty string.' }, { status: 400 });
@@ -29,7 +29,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
     const { data: rpcResponse, error: rpcError } = await supabase
       .rpc('get_account_by_wallet', {
-        p_wallet_address: wallet_address
+        wallet_address: wallet_address
       });
 
     if (rpcError) {
@@ -55,7 +55,7 @@ export const GET: RequestHandler = async ({ url }) => {
 export const POST: RequestHandler = async ({ request }) => {
   try {
     const body = await request.json();
-    const { wallet_address } = body;
+    const { accountId: wallet_address } = body;
 
     if (typeof wallet_address !== 'string' || wallet_address.trim() === '') {
       return json({ error: 'Invalid wallet_address: Must be a non-empty string.' }, { status: 400 });
@@ -63,7 +63,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     const { data: rpcResponse, error: rpcError } = await supabase
       .rpc('get_account_by_wallet', {
-        p_wallet_address: wallet_address
+        wallet_address: wallet_address
       });
 
     if (rpcError) {
