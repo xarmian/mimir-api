@@ -124,17 +124,60 @@ async function queryEvents(params: EventQueryParams) {
   return { data, count };
 }
 
+async function resolveEnvoiNames(addresses: string[]): Promise<Map<string, { name: string; metadata: any }>> {
+  const accountMap = new Map<string, { name: string; metadata: any }>();
+
+  if (addresses.length === 0) return accountMap;
+
+  try {
+    const { data, error } = await supabase.rpc('envoi_lookup_names_by_owner', {
+      p_addresses: addresses.join(','),
+      p_app_id: '45327686'
+    });
+
+    if (error) {
+      console.error('Error resolving Envoi names:', error);
+      return accountMap;
+    }
+
+    if (data && Array.isArray(data)) {
+      for (const account of data) {
+        if (account.address) {
+          accountMap.set(account.address, {
+            name: account.name,
+            metadata: account.metadata
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Exception resolving Envoi names:', error);
+  }
+
+  return accountMap;
+}
+
 export const POST: RequestHandler = async ({ request }: { request: Request }) => {
   try {
     const body = await request.json();
     const params = normalizeParams(body ?? {});
     const { data, count } = await queryEvents(params);
+
+    // Extract unique addresses and resolve Envoi names
+    const uniqueAddresses = [...new Set((data ?? []).map((row: any) => row.who).filter(Boolean))];
+    const accountMap = await resolveEnvoiNames(uniqueAddresses);
+
     const mapped = (data ?? []).map((row: any) => {
       const algTxid = decodeTxid(row?.txid);
+      const accountInfo = row.who ? accountMap.get(row.who) : null;
       return {
         ...row,
         txid: algTxid,
-        replayUrl: algTxid ? `https://demo.houseofvoi.com/replay/?tx=${algTxid}` : null
+        replayUrl: algTxid ? `https://demo.houseofvoi.com/replay/?tx=${algTxid}` : null,
+        ...(accountInfo && {
+          envoiName: accountInfo.name,
+          envoiMetadata: accountInfo.metadata
+        })
       };
     });
     return json({ data: mapped, count, params }, { headers: corsHeaders });
@@ -152,12 +195,22 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     url.searchParams.forEach((v, k) => { raw[k] = v; });
     const params = normalizeParams(raw);
     const { data, count } = await queryEvents(params);
+
+    // Extract unique addresses and resolve Envoi names
+    const uniqueAddresses = [...new Set((data ?? []).map((row: any) => row.who).filter(Boolean))];
+    const accountMap = await resolveEnvoiNames(uniqueAddresses);
+
     const mapped = (data ?? []).map((row: any) => {
       const algTxid = decodeTxid(row?.txid);
+      const accountInfo = row.who ? accountMap.get(row.who) : null;
       return {
         ...row,
         txid: algTxid,
-        replayUrl: algTxid ? `https://demo.houseofvoi.com/replay/?tx=${algTxid}` : null
+        replayUrl: algTxid ? `https://demo.houseofvoi.com/replay/?tx=${algTxid}` : null,
+        ...(accountInfo && {
+          envoiName: accountInfo.name,
+          envoiMetadata: accountInfo.metadata
+        })
       };
     });
     return json({ data: mapped, count, params }, { headers: corsHeaders });
