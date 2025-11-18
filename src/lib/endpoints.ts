@@ -270,6 +270,35 @@ const arc200Approvals = {
     }
 };
 
+const arc200Values = {
+    title: 'ARC200 Token Values',
+    path: '/arc200/values',
+    method: 'GET',
+    description: 'Get USD equivalent values for ARC200 tokens on the Voi Network.',
+    endpoint: 'arc200values',
+    parameters: [
+      {
+        name: 'tokenIds',
+        type: 'string',
+        description: 'Comma-separated list of token IDs (contract application IDs)',
+        required: true
+      },
+      {
+        name: 'timestamp',
+        type: 'string',
+        description: 'Optional timestamp (ISO 8601 format) to get historical values',
+        required: false
+      }
+    ],
+    example: {
+      request: 'GET /arc200/values?tokenIds=420069,390001',
+      response: `{
+  "420069": 1.45,
+  "390001": 0.0005291
+}`
+    }
+};
+
 const arc72Tokens = {
     title: 'ARC72 Tokens',
     path: '/nft-indexer/v1/tokens',
@@ -984,6 +1013,7 @@ export const endpoints = [
     arc200Balances,
     arc200Transfers,
     arc200Approvals,
+    arc200Values,
     arc72Tokens,
     arc72Transfers,
     arc72Collections,
