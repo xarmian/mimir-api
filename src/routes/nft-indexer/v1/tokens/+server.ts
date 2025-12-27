@@ -70,11 +70,13 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     const nextToken = url.searchParams.get('next-token');
     const metadataSearch = url.searchParams.get('metadataSearch');
     const metadataText = url.searchParams.get('metadataText');
+    const creator = url.searchParams.get('creator');
 
     // Create parameters object for RPC call
     const queryParams: Record<string, any> = {};
-    
+
     if (contractId) queryParams.contractId = contractId;
+    if (creator) queryParams.creator = creator;
     if (tokenId) queryParams.tokenId = tokenId;
     if (owner) queryParams.owner = owner;
     if (tokenIds) queryParams.tokenIds = tokenIds;
