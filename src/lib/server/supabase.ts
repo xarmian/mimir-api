@@ -26,19 +26,52 @@ export const upstreamFetch: typeof fetch = async (input, init) => {
 		init?.signal === undefined && input instanceof Request ? input.signal : init?.signal;
 	const signal = callerSignal ? AbortSignal.any([callerSignal, timeoutSignal]) : timeoutSignal;
 
+	function requestError(error: unknown): unknown {
+		if (signal.aborted && callerSignal && signal.reason === callerSignal.reason) {
+			return callerSignal.reason;
+		}
+		if (error instanceof UpstreamError) return error;
+		return new UpstreamError(timeoutSignal.aborted ? 504 : 502);
+	}
+
 	try {
 		const response = await globalThis.fetch(input, { ...init, signal });
 		if (response.status >= 500) {
 			void response.body?.cancel().catch(() => {});
 			throw new UpstreamError(response.status === 504 || response.status === 524 ? 504 : 502);
 		}
-		return response;
+		if (!response.body) return response;
+
+		// Fetch resolves at headers. Keep the signal context until the body finishes too,
+		// since a deadline can surface as AbortError or TypeError: terminated there.
+		const reader = response.body.getReader();
+		const body = new ReadableStream<Uint8Array>({
+			async pull(controller) {
+				try {
+					const { done, value } = await reader.read();
+					if (done) {
+						reader.releaseLock();
+						controller.close();
+					} else {
+						controller.enqueue(value);
+					}
+				} catch (error) {
+					reader.releaseLock();
+					controller.error(requestError(error));
+				}
+			},
+			async cancel(reason) {
+				await reader.cancel(reason);
+				reader.releaseLock();
+			}
+		});
+		return new Response(body, {
+			status: response.status,
+			statusText: response.statusText,
+			headers: response.headers
+		});
 	} catch (error) {
-		if (signal.aborted && callerSignal && signal.reason === callerSignal.reason) {
-			throw callerSignal.reason;
-		}
-		if (error instanceof UpstreamError) throw error;
-		throw new UpstreamError(timeoutSignal.aborted ? 504 : 502);
+		throw requestError(error);
 	}
 };
 

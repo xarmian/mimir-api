@@ -49,12 +49,20 @@ describe('upstreamFetch', () => {
 	});
 
 	it('passes through successful responses and request options', async () => {
-		const response = new Response('{"ok":true}');
+		const response = new Response('{"ok":true}', {
+			status: 201,
+			statusText: 'Created',
+			headers: { 'X-Upstream': 'value' }
+		});
 		const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(response);
 		vi.stubGlobal('fetch', fetchMock);
 		const init = { method: 'POST', headers: { 'X-Test': 'value' }, body: '{}' };
 
-		expect(await upstreamFetch('https://upstream.invalid', init)).toBe(response);
+		const result = await upstreamFetch('https://upstream.invalid', init);
+		expect(result.status).toBe(201);
+		expect(result.statusText).toBe('Created');
+		expect(result.headers.get('X-Upstream')).toBe('value');
+		expect(await result.json()).toEqual({ ok: true });
 		expect(fetchMock).toHaveBeenCalledWith('https://upstream.invalid', {
 			...init,
 			signal: expect.any(AbortSignal)
@@ -80,23 +88,62 @@ describe('upstreamFetch', () => {
 		}
 	);
 
-	it('bounds response body reads when the upstream sends headers then stalls', async () => {
+	it.each(['AbortError', 'TimeoutError', 'terminated'])(
+		'maps a stalled body rejecting with %s to 504',
+		async (failure) => {
+			vi.stubGlobal(
+				'fetch',
+				vi.fn<typeof fetch>().mockImplementation(async (_input, init) => {
+					const body = new ReadableStream({
+						start(controller) {
+							init?.signal?.addEventListener(
+								'abort',
+								() => {
+									controller.error(
+										failure === 'terminated'
+											? new TypeError('terminated')
+											: new DOMException('Body read aborted', failure)
+									);
+								},
+								{ once: true }
+							);
+						}
+					});
+					return new Response(body);
+				})
+			);
+			const response = await upstreamFetch('https://upstream.invalid');
+			const error = await response.json().catch((error: unknown) => error);
+			expect(upstreamErrorResponse(error)?.status).toBe(504);
+		}
+	);
+
+	it('preserves caller cancellation during a body read even after the deadline passes', async () => {
+		const caller = new AbortController();
 		vi.stubGlobal(
 			'fetch',
 			vi.fn<typeof fetch>().mockImplementation(async (_input, init) => {
-				const body = new ReadableStream({
-					start(controller) {
-						init?.signal?.addEventListener('abort', () => controller.error(init.signal?.reason), {
-							once: true
-						});
-					}
-				});
-				return new Response(body);
+				return new Response(
+					new ReadableStream({
+						start(controller) {
+							init?.signal?.addEventListener(
+								'abort',
+								() => {
+									controller.error(new DOMException('Body read aborted', 'AbortError'));
+								},
+								{ once: true }
+							);
+						}
+					})
+				);
 			})
 		);
-		const response = await upstreamFetch('https://upstream.invalid');
+		const response = await upstreamFetch('https://upstream.invalid', { signal: caller.signal });
+		caller.abort();
+		await new Promise((resolve) => setTimeout(resolve, 60));
 		const error = await response.json().catch((error: unknown) => error);
-		expect(upstreamErrorResponse(error)?.status).toBe(504);
+		expect(error).toBe(caller.signal.reason);
+		expect(upstreamErrorResponse(error)).toBeUndefined();
 	});
 
 	it.each([520, 524, 525])('maps upstream HTTP %i to a short gateway error', async (status) => {
