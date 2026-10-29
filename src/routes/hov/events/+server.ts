@@ -1,10 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-
-const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+import { supabase, upstreamErrorResponse } from '$lib/server/supabase';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -137,6 +133,7 @@ async function resolveEnvoiNames(addresses: string[]): Promise<Map<string, { nam
 
     if (error) {
       console.error('Error resolving Envoi names:', error);
+      if (upstreamErrorResponse(error)) throw error;
       return accountMap;
     }
 
@@ -152,6 +149,7 @@ async function resolveEnvoiNames(addresses: string[]): Promise<Map<string, { nam
     }
   } catch (error) {
     console.error('Exception resolving Envoi names:', error);
+    if (upstreamErrorResponse(error)) throw error;
   }
 
   return accountMap;
@@ -183,6 +181,8 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
     return json({ data: mapped, count, params }, { headers: corsHeaders });
   } catch (error: any) {
     console.error('Error querying hov_events (POST):', error);
+    const upstreamResponse = upstreamErrorResponse(error, corsHeaders);
+    if (upstreamResponse) return upstreamResponse;
     const msg = typeof error?.message === 'string' ? error.message : 'Internal server error';
     const status = msg.includes('Invalid') ? 400 : 500;
     return json({ error: msg }, { status, headers: corsHeaders });
@@ -216,6 +216,8 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     return json({ data: mapped, count, params }, { headers: corsHeaders });
   } catch (error: any) {
     console.error('Error querying hov_events (GET):', error);
+    const upstreamResponse = upstreamErrorResponse(error, corsHeaders);
+    if (upstreamResponse) return upstreamResponse;
     const msg = typeof error?.message === 'string' ? error.message : 'Internal server error';
     const status = msg.includes('Invalid') ? 400 : 500;
     return json({ error: msg }, { status, headers: corsHeaders });

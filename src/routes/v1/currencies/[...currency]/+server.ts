@@ -1,11 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
+import { supabase, upstreamErrorResponse, upstreamFetch } from '$lib/server/supabase';
 import allCurrencies from './currencies.json'; // Import the updated currencies
-
-const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 
 const symbols = {
   "USD": "$",
@@ -43,7 +39,7 @@ const corsHeaders = {
 
 // Helper function to fetch currency data
 async function fetchCurrencyData(currencyCode: string): Promise<any> {
-  const response = await fetch(`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${currencyCode.toLowerCase()}.json`);
+  const response = await upstreamFetch(`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${currencyCode.toLowerCase()}.json`);
   if (!response.ok) {
     throw new Error(`Failed to fetch data for ${currencyCode}: ${response.statusText}`);
   }
@@ -163,6 +159,7 @@ export const GET: RequestHandler = async (event) => {
 
     if (pastTokenUsdPriceError) {
       console.error('Supabase RPC error (past token USD price):', pastTokenUsdPriceError);
+      if (upstreamErrorResponse(pastTokenUsdPriceError)) throw pastTokenUsdPriceError;
       // Not throwing, as we can still proceed, but change will be 0 or 100%
     }
 
@@ -237,6 +234,8 @@ export const GET: RequestHandler = async (event) => {
     
   } catch (error: any) {
     console.error('Error fetching currency data:', error);
+    const upstreamResponse = upstreamErrorResponse(error, corsHeaders);
+    if (upstreamResponse) return upstreamResponse;
     return json({ error: error.message || 'Internal server error' }, { 
       status: 500,
       headers: corsHeaders

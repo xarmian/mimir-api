@@ -1,10 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-
-const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+import { supabase, upstreamErrorResponse } from '$lib/server/supabase';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -48,6 +44,8 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
     
   } catch (error) {
     console.error('Error fetching ARC200 tokens:', error);
+    const upstreamResponse = upstreamErrorResponse(error, corsHeaders);
+    if (upstreamResponse) return upstreamResponse;
     return json({ error: 'Internal server error' }, { 
       status: 500,
       headers: corsHeaders
@@ -133,6 +131,8 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     
   } catch (error) {
     console.error('Error fetching ARC72 tokens:', error);
+    const upstreamResponse = upstreamErrorResponse(error, corsHeaders);
+    if (upstreamResponse) return upstreamResponse;
     return json({ error: 'Internal server error' }, { 
       status: 500,
       headers: corsHeaders

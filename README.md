@@ -21,7 +21,7 @@ Currently, the Mimir API suite includes:
 
 ### Prerequisites
 
-- Node.js 18 or later
+- Node.js 22 (supported by the pinned Vercel adapter)
 - Supabase account
 - PostgreSQL database with Mimir schema
 
@@ -50,6 +50,22 @@ npm run dev
 ```
 
 The API will be available at `http://localhost:5173`.
+
+All server-side upstream requests use the shared client and fetch wrapper in
+`src/lib/server/supabase.ts`. Each call has a 10,000 ms deadline, including response
+body reads. Set the private `UPSTREAM_TIMEOUT_MS` environment variable to override
+it; absent or invalid values use the default. Caller abort signals are preserved.
+Keep the timeout below the 30-second Vercel function cap, allowing time for routes
+that make multiple upstream calls.
+
+Timeouts (including upstream HTTP 504/524) return status 504 with
+`{"error":"Upstream request timed out"}`. Network failures and other upstream HTTP
+5xx responses return 502 with `{"error":"Upstream request failed"}`. Existing query
+and validation error handling remains in place.
+
+Run `npm test` for the fetch and route regression tests. They use mocked upstreams
+and require no credentials or network access. The abort tests use short real
+timeouts because native `AbortSignal.timeout` does not use Vitest's fake timers.
 
 ### Production Deployment
 

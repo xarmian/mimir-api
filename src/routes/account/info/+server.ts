@@ -1,10 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-
-const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+import { supabase, upstreamErrorResponse } from '$lib/server/supabase';
 
 // TODO: Consider if CORS headers are needed here, similar to other endpoints.
 // const corsHeaders = {
@@ -34,7 +30,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
     if (rpcError) {
       console.error('Supabase RPC error:', rpcError);
-      return json({ error: 'RPC error occurred' }, { status: 500 });
+      return upstreamErrorResponse(rpcError) ?? json({ error: 'RPC error occurred' }, { status: 500 });
     }
 
     if (!rpcResponse || !Array.isArray(rpcResponse)) {
@@ -48,6 +44,8 @@ export const GET: RequestHandler = async ({ url }) => {
     return json({ account: accountInfo });
   } catch (error) {
     console.error('Error processing account info request:', error);
+    const upstreamResponse = upstreamErrorResponse(error);
+    if (upstreamResponse) return upstreamResponse;
     return json({ error: 'An unexpected error occurred processing your request.' }, { status: 500 });
   }
 };
@@ -68,7 +66,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     if (rpcError) {
       console.error('Supabase RPC error:', rpcError);
-      return json({ error: 'RPC error occurred' }, { status: 500 });
+      return upstreamErrorResponse(rpcError) ?? json({ error: 'RPC error occurred' }, { status: 500 });
     }
 
     if (!rpcResponse || !Array.isArray(rpcResponse)) {
@@ -82,6 +80,8 @@ export const POST: RequestHandler = async ({ request }) => {
     return json({ account: accountInfo });
   } catch (error) {
     console.error('Error processing account info request:', error);
+    const upstreamResponse = upstreamErrorResponse(error);
+    if (upstreamResponse) return upstreamResponse;
     if (error instanceof SyntaxError) {
       return json({ error: 'Invalid JSON payload.' }, { status: 400 });
     }
