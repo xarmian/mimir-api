@@ -9,10 +9,13 @@ export const UPSTREAM_TIMEOUT_MS =
 		? configuredTimeout
 		: 10000;
 
-class UpstreamError extends Error {
+export class UpstreamError extends Error {
 	readonly code: string;
 
-	constructor(status: 502 | 504) {
+	constructor(
+		status: 502 | 504,
+		readonly upstreamStatus?: number
+	) {
 		super(status === 504 ? 'Upstream request timed out' : 'Upstream request failed');
 		this.name = 'UpstreamError';
 		// PostgREST preserves code when it serializes a rejected fetch into a query error.
@@ -38,7 +41,10 @@ export const upstreamFetch: typeof fetch = async (input, init) => {
 		const response = await globalThis.fetch(input, { ...init, signal });
 		if (response.status >= 500) {
 			void response.body?.cancel().catch(() => {});
-			throw new UpstreamError(response.status === 504 || response.status === 524 ? 504 : 502);
+			throw new UpstreamError(
+				response.status === 504 || response.status === 524 ? 504 : 502,
+				response.status
+			);
 		}
 		if (!response.body) return response;
 

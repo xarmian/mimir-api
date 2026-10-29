@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { supabase, upstreamErrorResponse, upstreamFetch } from '$lib/server/supabase';
+import { supabase, upstreamErrorResponse, upstreamFetch, UpstreamError } from '$lib/server/supabase';
 import allCurrencies from './currencies.json'; // Import the updated currencies
 
 const symbols = {
@@ -39,9 +39,20 @@ const corsHeaders = {
 
 // Helper function to fetch currency data
 async function fetchCurrencyData(currencyCode: string, signal: AbortSignal): Promise<any> {
-  const response = await upstreamFetch(`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${currencyCode.toLowerCase()}.json`, { signal });
+  const response = await upstreamFetch(
+    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${currencyCode.toLowerCase()}.json`,
+    { signal }
+  ).catch((error: unknown) => {
+    // The currency API's non-OK HTTP responses are gateway failures, including HTTP 504/524.
+    // A deadline without an HTTP response keeps its timeout classification.
+    if (error instanceof UpstreamError && error.upstreamStatus !== undefined) {
+      throw new UpstreamError(502);
+    }
+    throw error;
+  });
   if (!response.ok) {
-    throw new Error(`Failed to fetch data for ${currencyCode}: ${response.statusText}`);
+    void response.body?.cancel().catch(() => {});
+    throw new UpstreamError(502);
   }
   return response.json();
 }
