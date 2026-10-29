@@ -1,10 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-
-const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+import { supabase, upstreamErrorResponse } from '$lib/server/supabase';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -71,7 +67,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
       p_min_round: requestParams.min_round || null,
       p_max_round: requestParams.max_round || null,
       p_includes: requestParams.includes || null
-    });
+    }).abortSignal(request.signal);
 
     if (error) {
       console.error('Supabase RPC error:', error);
@@ -86,6 +82,8 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
     
   } catch (error) {
     console.error('Error fetching ARC200 transfers:', error);
+    const upstreamResponse = upstreamErrorResponse(error, corsHeaders);
+    if (upstreamResponse) return upstreamResponse;
     return json({ error: 'Internal server error' }, { 
       status: 500,
       headers: corsHeaders
@@ -94,7 +92,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 };
 
 // Handle GET request for ARC200 transfers
-export const GET: RequestHandler = async ({ url }: { url: URL }) => {
+export const GET: RequestHandler = async ({ url, request }) => {
   try {
     // Get query parameters
     const round = url.searchParams.get('round');
@@ -120,7 +118,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
       p_min_round: minRound ? parseInt(minRound) : null,
       p_max_round: maxRound ? parseInt(maxRound) : null,
       p_includes: includes || null
-    });
+    }).abortSignal(request.signal);
 
     if (error) {
       console.error('Supabase RPC error:', error);
@@ -135,6 +133,8 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     
   } catch (error) {
     console.error('Error fetching ARC200 transfers:', error);
+    const upstreamResponse = upstreamErrorResponse(error, corsHeaders);
+    if (upstreamResponse) return upstreamResponse;
     return json({ error: 'Internal server error' }, { 
       status: 500,
       headers: corsHeaders

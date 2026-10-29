@@ -1,11 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
+import { supabase, upstreamErrorResponse, upstreamFetch, UpstreamError } from '$lib/server/supabase';
 import allCurrencies from './currencies.json'; // Import the updated currencies
-
-const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
 
 const symbols = {
   "USD": "$",
@@ -42,10 +38,21 @@ const corsHeaders = {
 };
 
 // Helper function to fetch currency data
-async function fetchCurrencyData(currencyCode: string): Promise<any> {
-  const response = await fetch(`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${currencyCode.toLowerCase()}.json`);
+async function fetchCurrencyData(currencyCode: string, signal: AbortSignal): Promise<any> {
+  const response = await upstreamFetch(
+    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${currencyCode.toLowerCase()}.json`,
+    { signal }
+  ).catch((error: unknown) => {
+    // The currency API's non-OK HTTP responses are gateway failures, including HTTP 504/524.
+    // A deadline without an HTTP response keeps its timeout classification.
+    if (error instanceof UpstreamError && error.upstreamStatus !== undefined) {
+      throw new UpstreamError(502);
+    }
+    throw error;
+  });
   if (!response.ok) {
-    throw new Error(`Failed to fetch data for ${currencyCode}: ${response.statusText}`);
+    void response.body?.cancel().catch(() => {});
+    throw new UpstreamError(502);
   }
   return response.json();
 }
@@ -142,7 +149,7 @@ export const GET: RequestHandler = async (event) => {
     const { data: currentTokenUsdPrice, error: currentTokenUsdPriceError } = await supabase
       .rpc('calculate_token_usd_value', {
         p_input_asset_id: tokenAssetId
-      });
+      }).abortSignal(event.request.signal);
 
     if (currentTokenUsdPriceError) {
       console.error('Supabase RPC error (current token USD price):', currentTokenUsdPriceError);
@@ -159,10 +166,12 @@ export const GET: RequestHandler = async (event) => {
       .rpc('calculate_token_usd_value', {
         p_input_asset_id: tokenAssetId,
         p_timestamp: timestamp24HoursAgo.toISOString()
-      });
+      }).abortSignal(event.request.signal);
 
     if (pastTokenUsdPriceError) {
       console.error('Supabase RPC error (past token USD price):', pastTokenUsdPriceError);
+      event.request.signal.throwIfAborted();
+      if (upstreamErrorResponse(pastTokenUsdPriceError)) throw pastTokenUsdPriceError;
       // Not throwing, as we can still proceed, but change will be 0 or 100%
     }
 
@@ -179,7 +188,7 @@ export const GET: RequestHandler = async (event) => {
       }
     } else {
       // Requested currency is NOT USD, fetch usd.json for all rates relative to USD
-      const apiUsdData = await fetchCurrencyData('usd');
+      const apiUsdData = await fetchCurrencyData('usd', event.request.signal);
       const ratesFromUsdBase = apiUsdData.usd; // This is an object like {"eur": 0.93, "jpy": 150, ...}
                                            // where key is target currency, value is how much of target currency 1 USD buys.
 
@@ -237,6 +246,8 @@ export const GET: RequestHandler = async (event) => {
     
   } catch (error: any) {
     console.error('Error fetching currency data:', error);
+    const upstreamResponse = upstreamErrorResponse(error, corsHeaders);
+    if (upstreamResponse) return upstreamResponse;
     return json({ error: error.message || 'Internal server error' }, { 
       status: 500,
       headers: corsHeaders

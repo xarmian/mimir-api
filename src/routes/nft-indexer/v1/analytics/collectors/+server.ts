@@ -1,10 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-
-const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+import { supabase, upstreamErrorResponse } from '$lib/server/supabase';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,7 +25,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
     const { data, error } = await supabase
       .rpc('arc72_get_collectors', {
         params: requestParams
-      });
+      }).abortSignal(request.signal);
 
     if (error) {
       console.error('Supabase RPC error:', error);
@@ -41,6 +37,8 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
     
   } catch (error) {
     console.error('Error fetching ARC72 collectors:', error);
+    const upstreamResponse = upstreamErrorResponse(error, corsHeaders);
+    if (upstreamResponse) return upstreamResponse;
     return json({ error: 'Internal server error' }, { 
       status: 500,
       headers: corsHeaders
@@ -49,7 +47,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 };
 
 // Handle GET request for ARC72 tokens
-export const GET: RequestHandler = async ({ url }: { url: URL }) => {
+export const GET: RequestHandler = async ({ url, request }) => {
   try {
     // Get query parameters
     const contractId = url.searchParams.get('contractId');
@@ -67,7 +65,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     const { data, error } = await supabase
       .rpc('arc72_get_collectors', {
         params: queryParams
-      });
+      }).abortSignal(request.signal);
 
     if (error) {
       console.error('Supabase RPC error:', error);
@@ -79,6 +77,8 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     
   } catch (error) {
     console.error('Error fetching ARC72 collectors:', error);
+    const upstreamResponse = upstreamErrorResponse(error, corsHeaders);
+    if (upstreamResponse) return upstreamResponse;
     return json({ error: 'Internal server error' }, { 
       status: 500,
       headers: corsHeaders

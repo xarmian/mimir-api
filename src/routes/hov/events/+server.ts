@@ -1,10 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-
-const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+import { supabase, upstreamErrorResponse } from '$lib/server/supabase';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -89,7 +85,7 @@ function normalizeParams(raw: Record<string, any>): EventQueryParams {
   return params;
 }
 
-async function queryEvents(params: EventQueryParams) {
+async function queryEvents(params: EventQueryParams, signal: AbortSignal) {
   let q = supabase
     .from('hov_events')
     .select('*', { count: 'exact' });
@@ -119,12 +115,12 @@ async function queryEvents(params: EventQueryParams) {
   const end = start + ((params.limit ?? 100) - 1);
   q = q.range(start, end);
 
-  const { data, error, count } = await q;
+  const { data, error, count } = await q.abortSignal(signal);
   if (error) throw error;
   return { data, count };
 }
 
-async function resolveEnvoiNames(addresses: string[]): Promise<Map<string, { name: string; metadata: any }>> {
+async function resolveEnvoiNames(addresses: string[], signal: AbortSignal): Promise<Map<string, { name: string; metadata: any }>> {
   const accountMap = new Map<string, { name: string; metadata: any }>();
 
   if (addresses.length === 0) return accountMap;
@@ -133,10 +129,12 @@ async function resolveEnvoiNames(addresses: string[]): Promise<Map<string, { nam
     const { data, error } = await supabase.rpc('envoi_lookup_names_by_owner', {
       p_addresses: addresses.join(','),
       p_app_id: '45327686'
-    });
+    }).abortSignal(signal);
 
     if (error) {
       console.error('Error resolving Envoi names:', error);
+      signal.throwIfAborted();
+      if (upstreamErrorResponse(error)) throw error;
       return accountMap;
     }
 
@@ -152,6 +150,8 @@ async function resolveEnvoiNames(addresses: string[]): Promise<Map<string, { nam
     }
   } catch (error) {
     console.error('Exception resolving Envoi names:', error);
+    signal.throwIfAborted();
+    if (upstreamErrorResponse(error)) throw error;
   }
 
   return accountMap;
@@ -161,11 +161,11 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
   try {
     const body = await request.json();
     const params = normalizeParams(body ?? {});
-    const { data, count } = await queryEvents(params);
+    const { data, count } = await queryEvents(params, request.signal);
 
     // Extract unique addresses and resolve Envoi names
     const uniqueAddresses = [...new Set((data ?? []).map((row: any) => row.who).filter(Boolean))];
-    const accountMap = await resolveEnvoiNames(uniqueAddresses);
+    const accountMap = await resolveEnvoiNames(uniqueAddresses, request.signal);
 
     const mapped = (data ?? []).map((row: any) => {
       const algTxid = decodeTxid(row?.txid);
@@ -183,22 +183,24 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
     return json({ data: mapped, count, params }, { headers: corsHeaders });
   } catch (error: any) {
     console.error('Error querying hov_events (POST):', error);
+    const upstreamResponse = upstreamErrorResponse(error, corsHeaders);
+    if (upstreamResponse) return upstreamResponse;
     const msg = typeof error?.message === 'string' ? error.message : 'Internal server error';
     const status = msg.includes('Invalid') ? 400 : 500;
     return json({ error: msg }, { status, headers: corsHeaders });
   }
 };
 
-export const GET: RequestHandler = async ({ url }: { url: URL }) => {
+export const GET: RequestHandler = async ({ url, request }) => {
   try {
     const raw: Record<string, any> = {};
     url.searchParams.forEach((v, k) => { raw[k] = v; });
     const params = normalizeParams(raw);
-    const { data, count } = await queryEvents(params);
+    const { data, count } = await queryEvents(params, request.signal);
 
     // Extract unique addresses and resolve Envoi names
     const uniqueAddresses = [...new Set((data ?? []).map((row: any) => row.who).filter(Boolean))];
-    const accountMap = await resolveEnvoiNames(uniqueAddresses);
+    const accountMap = await resolveEnvoiNames(uniqueAddresses, request.signal);
 
     const mapped = (data ?? []).map((row: any) => {
       const algTxid = decodeTxid(row?.txid);
@@ -216,6 +218,8 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     return json({ data: mapped, count, params }, { headers: corsHeaders });
   } catch (error: any) {
     console.error('Error querying hov_events (GET):', error);
+    const upstreamResponse = upstreamErrorResponse(error, corsHeaders);
+    if (upstreamResponse) return upstreamResponse;
     const msg = typeof error?.message === 'string' ? error.message : 'Internal server error';
     const status = msg.includes('Invalid') ? 400 : 500;
     return json({ error: msg }, { status, headers: corsHeaders });

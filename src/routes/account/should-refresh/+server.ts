@@ -1,10 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-
-const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+import { supabase, upstreamErrorResponse } from '$lib/server/supabase';
 
 // TODO: Consider if CORS headers are needed here, similar to other endpoints.
 // const corsHeaders = {
@@ -36,11 +32,11 @@ export const POST: RequestHandler = async ({ request }) => {
       .rpc('should_refresh', {
         p_account_addresses: account_addresses,
         p_round_number: last_known_round
-      });
+      }).abortSignal(request.signal);
 
     if (rpcError) {
       console.error('Supabase RPC error:', rpcError);
-      return json({ error: 'RPC error occurred' }, { status: 500 });
+      return upstreamErrorResponse(rpcError) ?? json({ error: 'RPC error occurred' }, { status: 500 });
     }
     
     const refresh = typeof rpcResponse === 'boolean' ? rpcResponse : rpcResponse?.result;
@@ -53,6 +49,8 @@ export const POST: RequestHandler = async ({ request }) => {
     return json({ refresh });
   } catch (error) {
     console.error('Error processing should-refresh request:', error);
+    const upstreamResponse = upstreamErrorResponse(error);
+    if (upstreamResponse) return upstreamResponse;
     if (error instanceof SyntaxError) {
       return json({ error: 'Invalid JSON payload.' }, { status: 400 });
     }

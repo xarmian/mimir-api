@@ -1,10 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { createClient } from '@supabase/supabase-js';
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
-import { PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-
-const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+import { supabase, upstreamErrorResponse } from '$lib/server/supabase';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -113,7 +109,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
     const rpcParams = prepareRpcParams(requestParams);
 
     // Call the RPC function with direct parameters
-    const { data, error } = await supabase.rpc('get_hov_tournament', rpcParams);
+    const { data, error } = await supabase.rpc('get_hov_tournament', rpcParams).abortSignal(request.signal);
         
     if (error) {
       console.error('Supabase RPC error (POST /hov/tournaments):', error);
@@ -129,6 +125,8 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 
   } catch (error: any) {
     console.error('Error fetching Hov tournament data (POST):', error);
+    const upstreamResponse = upstreamErrorResponse(error, corsHeaders);
+    if (upstreamResponse) return upstreamResponse;
     // Handle specific validation errors from prepareRpcParams
      if (error.message.startsWith('Invalid') || error.message.includes('required')) {
         return json({ error: error.message }, { status: 400, headers: corsHeaders });
@@ -142,7 +140,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 };
 
 // Handle GET request for Hov tournament data
-export const GET: RequestHandler = async ({ url }: { url: URL }) => {
+export const GET: RequestHandler = async ({ url, request }) => {
   try {
     // Get query parameters
     const queryParams = {
@@ -158,7 +156,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     const rpcParams = prepareRpcParams(queryParams);
 
     // Call the RPC function with direct parameters
-    const { data, error } = await supabase.rpc('get_hov_tournament', rpcParams);
+    const { data, error } = await supabase.rpc('get_hov_tournament', rpcParams).abortSignal(request.signal);
 
     if (error) {
       console.error('Supabase RPC error (GET /hov/tournaments):', error);
@@ -174,6 +172,8 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
 
   } catch (error: any) {
     console.error('Error fetching Hov tournament data (GET):', error);
+    const upstreamResponse = upstreamErrorResponse(error, corsHeaders);
+    if (upstreamResponse) return upstreamResponse;
      // Handle specific validation errors from prepareRpcParams
      if (error.message.startsWith('Invalid') || error.message.includes('required')) {
         return json({ error: error.message }, { status: 400, headers: corsHeaders });
