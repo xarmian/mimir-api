@@ -69,7 +69,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
     
     // Call the RPC function
     const { data, error } = await supabase
-      .rpc('calculate_token_usd_values', rpcParams);
+      .rpc('calculate_token_usd_values', rpcParams).abortSignal(request.signal);
 
     if (error) {
       console.error('Supabase RPC error:', error);
@@ -103,7 +103,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 };
 
 // Handle GET request for ARC200 token values
-export const GET: RequestHandler = async ({ url }: { url: URL }) => {
+export const GET: RequestHandler = async ({ url, request }) => {
   try {
     // Get query parameters
     const tokenIds = url.searchParams.get('tokenIds');
@@ -129,7 +129,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     
     // Call the RPC function
     const { data, error } = await supabase
-      .rpc('calculate_token_usd_values', rpcParams);
+      .rpc('calculate_token_usd_values', rpcParams).abortSignal(request.signal);
 
     if (error) {
       console.error('Supabase RPC error:', error);

@@ -74,7 +74,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
     const rpcParams = prepareRpcParams(requestParams);
 
     // Call the RPC function with parameters nested under 'params' key
-    const { data, error } = await supabase.rpc('get_arc200_pools', { params: rpcParams });
+    const { data, error } = await supabase.rpc('get_arc200_pools', { params: rpcParams }).abortSignal(request.signal);
 
     if (error) {
       console.error('Supabase RPC error (POST /dex/pools):', error);
@@ -105,7 +105,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 };
 
 // Handle GET request for ARC200 pools
-export const GET: RequestHandler = async ({ url }: { url: URL }) => {
+export const GET: RequestHandler = async ({ url, request }) => {
   try {
     // Get query parameters
     const queryParams = {
@@ -120,7 +120,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     const rpcParams = prepareRpcParams(queryParams);
 
     // Call the RPC function with parameters nested under 'params' key
-    const { data, error } = await supabase.rpc('get_arc200_pools', { params: rpcParams });
+    const { data, error } = await supabase.rpc('get_arc200_pools', { params: rpcParams }).abortSignal(request.signal);
 
     if (error) {
       console.error('Supabase RPC error (GET /dex/pools):', error);

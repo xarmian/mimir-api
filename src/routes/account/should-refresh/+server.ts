@@ -32,7 +32,7 @@ export const POST: RequestHandler = async ({ request }) => {
       .rpc('should_refresh', {
         p_account_addresses: account_addresses,
         p_round_number: last_known_round
-      });
+      }).abortSignal(request.signal);
 
     if (rpcError) {
       console.error('Supabase RPC error:', rpcError);

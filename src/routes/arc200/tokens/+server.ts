@@ -25,7 +25,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
     const { data, error } = await supabase
       .rpc('get_arc200_tokens', {
         params: requestParams
-      });
+      }).abortSignal(request.signal);
 
     if (error) {
       console.error('Supabase RPC error:', error);
@@ -47,7 +47,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 };
 
 // Handle GET request for ARC200 tokens
-export const GET: RequestHandler = async ({ url }: { url: URL }) => {
+export const GET: RequestHandler = async ({ url, request }) => {
   try {
     // Get query parameters
     const contractId = url.searchParams.get('contractId');
@@ -69,7 +69,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     const { data, error } = await supabase
       .rpc('get_arc200_tokens', {
         params: queryParams
-      });
+      }).abortSignal(request.signal);
 
     if (error) {
       console.error('Supabase RPC error:', error);

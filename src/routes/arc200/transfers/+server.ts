@@ -67,7 +67,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
       p_min_round: requestParams.min_round || null,
       p_max_round: requestParams.max_round || null,
       p_includes: requestParams.includes || null
-    });
+    }).abortSignal(request.signal);
 
     if (error) {
       console.error('Supabase RPC error:', error);
@@ -92,7 +92,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 };
 
 // Handle GET request for ARC200 transfers
-export const GET: RequestHandler = async ({ url }: { url: URL }) => {
+export const GET: RequestHandler = async ({ url, request }) => {
   try {
     // Get query parameters
     const round = url.searchParams.get('round');
@@ -118,7 +118,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
       p_min_round: minRound ? parseInt(minRound) : null,
       p_max_round: maxRound ? parseInt(maxRound) : null,
       p_includes: includes || null
-    });
+    }).abortSignal(request.signal);
 
     if (error) {
       console.error('Supabase RPC error:', error);

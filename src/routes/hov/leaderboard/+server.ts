@@ -109,7 +109,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
     const rpcParams = prepareRpcParams(requestParams);
 
     // Call the RPC function with direct parameters
-    const { data, error } = await supabase.rpc('get_hov_tournament', rpcParams);
+    const { data, error } = await supabase.rpc('get_hov_tournament', rpcParams).abortSignal(request.signal);
         
     if (error) {
       console.error('Supabase RPC error (POST /hov/tournaments):', error);
@@ -140,7 +140,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 };
 
 // Handle GET request for Hov tournament data
-export const GET: RequestHandler = async ({ url }: { url: URL }) => {
+export const GET: RequestHandler = async ({ url, request }) => {
   try {
     // Get query parameters
     const queryParams = {
@@ -156,7 +156,7 @@ export const GET: RequestHandler = async ({ url }: { url: URL }) => {
     const rpcParams = prepareRpcParams(queryParams);
 
     // Call the RPC function with direct parameters
-    const { data, error } = await supabase.rpc('get_hov_tournament', rpcParams);
+    const { data, error } = await supabase.rpc('get_hov_tournament', rpcParams).abortSignal(request.signal);
 
     if (error) {
       console.error('Supabase RPC error (GET /hov/tournaments):', error);

@@ -15,7 +15,7 @@ import { supabase, upstreamErrorResponse } from '$lib/server/supabase';
 //   });
 // };
 
-export const GET: RequestHandler = async ({ url }) => {
+export const GET: RequestHandler = async ({ url, request }) => {
   try {
     const wallet_address = url.searchParams.get('accountId');
 
@@ -26,7 +26,7 @@ export const GET: RequestHandler = async ({ url }) => {
     const { data: rpcResponse, error: rpcError } = await supabase
       .rpc('get_account_by_wallet', {
         wallet_address: wallet_address
-      });
+      }).abortSignal(request.signal);
 
     if (rpcError) {
       console.error('Supabase RPC error:', rpcError);
@@ -62,7 +62,7 @@ export const POST: RequestHandler = async ({ request }) => {
     const { data: rpcResponse, error: rpcError } = await supabase
       .rpc('get_account_by_wallet', {
         wallet_address: wallet_address
-      });
+      }).abortSignal(request.signal);
 
     if (rpcError) {
       console.error('Supabase RPC error:', rpcError);

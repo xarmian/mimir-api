@@ -38,8 +38,8 @@ const corsHeaders = {
 };
 
 // Helper function to fetch currency data
-async function fetchCurrencyData(currencyCode: string): Promise<any> {
-  const response = await upstreamFetch(`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${currencyCode.toLowerCase()}.json`);
+async function fetchCurrencyData(currencyCode: string, signal: AbortSignal): Promise<any> {
+  const response = await upstreamFetch(`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${currencyCode.toLowerCase()}.json`, { signal });
   if (!response.ok) {
     throw new Error(`Failed to fetch data for ${currencyCode}: ${response.statusText}`);
   }
@@ -138,7 +138,7 @@ export const GET: RequestHandler = async (event) => {
     const { data: currentTokenUsdPrice, error: currentTokenUsdPriceError } = await supabase
       .rpc('calculate_token_usd_value', {
         p_input_asset_id: tokenAssetId
-      });
+      }).abortSignal(event.request.signal);
 
     if (currentTokenUsdPriceError) {
       console.error('Supabase RPC error (current token USD price):', currentTokenUsdPriceError);
@@ -155,10 +155,11 @@ export const GET: RequestHandler = async (event) => {
       .rpc('calculate_token_usd_value', {
         p_input_asset_id: tokenAssetId,
         p_timestamp: timestamp24HoursAgo.toISOString()
-      });
+      }).abortSignal(event.request.signal);
 
     if (pastTokenUsdPriceError) {
       console.error('Supabase RPC error (past token USD price):', pastTokenUsdPriceError);
+      event.request.signal.throwIfAborted();
       if (upstreamErrorResponse(pastTokenUsdPriceError)) throw pastTokenUsdPriceError;
       // Not throwing, as we can still proceed, but change will be 0 or 100%
     }
@@ -176,7 +177,7 @@ export const GET: RequestHandler = async (event) => {
       }
     } else {
       // Requested currency is NOT USD, fetch usd.json for all rates relative to USD
-      const apiUsdData = await fetchCurrencyData('usd');
+      const apiUsdData = await fetchCurrencyData('usd', event.request.signal);
       const ratesFromUsdBase = apiUsdData.usd; // This is an object like {"eur": 0.93, "jpy": 150, ...}
                                            // where key is target currency, value is how much of target currency 1 USD buys.
 

@@ -31,16 +31,17 @@ afterEach(() => {
 	vi.unstubAllGlobals();
 });
 
-function event(method: string): RequestEvent {
+function event(method: string, signal?: AbortSignal): RequestEvent {
 	const url = new URL('https://app.invalid');
 	for (const [key, value] of Object.entries(params)) url.searchParams.set(key, String(value));
 	const fixture: Pick<RequestEvent, 'url' | 'params' | 'request'> = {
 		url,
 		params: { currency: 'EUR' },
-		request: new Request(
-			url,
-			method === 'POST' ? { method, body: JSON.stringify(params) } : undefined
-		)
+		request: new Request(url, {
+			method,
+			signal,
+			...(method === 'POST' ? { body: JSON.stringify(params) } : {})
+		})
 	};
 	return fixture as RequestEvent;
 }
@@ -100,5 +101,59 @@ it.each(['currency fetch', 'past price', 'name lookup'])(
 		const response = await modules[path].GET!(event('GET'));
 		expect(response.status).toBe(502);
 		expect(await response.json()).toEqual({ error: 'Upstream request failed' });
+	}
+);
+
+it.each(routes)('%s forwards caller cancellation from every handler', async (_path, route) => {
+	for (const method of ['GET', 'POST'] as const) {
+		const handler = route[method];
+		if (!handler) continue;
+		const caller = new AbortController();
+		const reason = new DOMException('Client disconnected', 'AbortError');
+		const fetchMock = vi.fn<typeof fetch>().mockImplementation(async (_input, init) => {
+			caller.abort(reason);
+			return new Promise((_resolve, reject) => {
+				const signal = init?.signal;
+				if (signal?.aborted) reject(signal.reason);
+				else signal?.addEventListener('abort', () => reject(signal.reason), { once: true });
+			});
+		});
+		vi.stubGlobal('fetch', fetchMock);
+		const response = await handler(event(method, caller.signal));
+		expect(fetchMock).toHaveBeenCalled();
+		expect(fetchMock.mock.calls[0][1]?.signal?.reason).toBe(reason);
+		expect(response.status).not.toBe(504);
+	}
+});
+
+it.each(['past price', 'currency fetch', 'name lookup'])(
+	'forwards caller cancellation to the secondary %s',
+	async (step) => {
+		const caller = new AbortController();
+		const reason = new DOMException('Client disconnected', 'AbortError');
+		const observed: (AbortSignal | null | undefined)[] = [];
+		const fetchMock = vi.fn<typeof fetch>().mockImplementation(async (_input, init) => {
+			observed.push(init?.signal);
+			const targetCall = step === 'currency fetch' ? 3 : 2;
+			if (observed.length < targetCall) {
+				return new Response(step === 'name lookup' ? '[{"who":"test-address"}]' : '1');
+			}
+			caller.abort(reason);
+			return new Promise((_resolve, reject) => {
+				const signal = init?.signal;
+				if (signal?.aborted) reject(signal.reason);
+				else signal?.addEventListener('abort', () => reject(signal.reason), { once: true });
+			});
+		});
+		vi.stubGlobal('fetch', fetchMock);
+		const path =
+			step === 'name lookup'
+				? '../src/routes/hov/events/+server.ts'
+				: '../src/routes/v1/currencies/[...currency]/+server.ts';
+		await modules[path].GET!(event('GET', caller.signal));
+		expect(observed.length).toBe(step === 'currency fetch' ? 3 : 2);
+		for (const signal of observed) {
+			expect(signal?.reason).toBe(reason);
+		}
 	}
 );
